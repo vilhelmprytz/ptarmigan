@@ -64,3 +64,11 @@ class MessagesTable:
             return query["result"]
         
         raise Exception(f'unable to fetch obj using id from {self.name}, error {query["result"]}')
+
+    def get_ticket_id(self, ticket_id):
+        query = sql_query(f'''SELECT * FROM {self.name} WHERE ticket_id={ticket_id}''')
+
+        if query["status"]:
+            return query["result"]
+        
+        raise Exception(f'unable to fetch objs using ticket_id from {self.name}, error {query["result"]}')

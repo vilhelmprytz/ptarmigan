@@ -20,3 +20,11 @@ def random_string(length = 10):
     """Generate a random string of fixed length"""
 
     return ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(length))
+
+def is_integer(string):
+    try:
+        try_int = int(string)
+    except Exception:
+        return False
+    
+    return True

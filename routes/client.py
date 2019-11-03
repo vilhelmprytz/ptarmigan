@@ -13,12 +13,13 @@
 #                                                         #
 ###########################################################
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, redirect
 
 import sys
 sys.path.append('..')
 
 from components.database import get_database_objects
+from components.tools import is_integer
 
 client_routes = Blueprint('client_routes', __name__, template_folder='../templates')
 
@@ -63,5 +64,36 @@ def submit():
         except Exception as err:
             return f"error occured, {err}"
 
+        return redirect(f'/ticket?id={ticket["id"]}&key={ticket["client_key"]}')
+
     if request.method == "GET":
         return render_template("client/submit.html")
+
+@client_routes.route("/ticket")
+def ticket():
+    data = request.args
+
+    if not data or len(data) < 2:
+        return "missing arguments", 400
+
+    for key, value in data.items():
+        if key != "id" and key != "key":
+            return "at least one invalid variable", 400
+
+        if key == "id":
+            if not is_integer(value):
+                return "id must be integer", 400
+
+        if key == "key":
+            if len(value) != 15:
+                return "secret key is invalid length", 400
+
+    # check if secret_key is correct
+    ticket = Tickets.get_id(id)
+
+    if ticket["client_key"] != data["key"]:
+        return "invalid secret key", 400
+
+    messages = Messages.get_ticket_id(id)
+
+    return render_template("client/ticket.html", ticket=ticket, messages=messages)

@@ -41,7 +41,7 @@ def sql_query(query):
     cnx, cursor = database_connection()
 
     try:
-        cursor.execute(query)
+        query_result["result"] = cursor.execute(query)
     except Exception as err:
         query_result["status"] = False
         query_result["result"] = str(err)
@@ -49,9 +49,10 @@ def sql_query(query):
         return query_result
 
     try:
-        result = cursor.fetchall()
+        query_result["result"] = cursor.fetchall()
     except Exception:
-        query_result["result"] = str(result)
+        if not query_result["result"]:
+            query_result["result"] = None
 
     cnx.commit()
     cursor.close()

@@ -51,7 +51,7 @@ class TicketsTable:
 
     def new(self, name, email, status=0):
         query = sql_query(f'''INSERT INTO {self.name} (name, email, client_key, status, creation_date)
-            VALUES ("{name}", "{email}", "{random_string(length = 15)}"," {status}, CURRENT_TIMESTAMP())
+            VALUES ("{name}", "{email}", "{random_string(length = 15)}", {status}, CURRENT_TIMESTAMP())
         ''')
 
         if query["status"]:
