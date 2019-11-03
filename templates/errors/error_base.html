@@ -1,0 +1,11 @@
+{% set code %}{% block error_code %}{% endblock %}{% endset %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error {{ code }}</title>
+</head>
+<body>
+    <h1>{{ code }}</h1>
+    <p>{% block error_message %}{% endblock %}</p>
+</body>
+</html>

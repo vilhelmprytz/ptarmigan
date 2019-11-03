@@ -26,13 +26,6 @@ from flask_session.__init__ import Session
 # flask app
 app = Flask(__name__)
 
-# register admin and client routes
-from client import client_routes
-from admin import admin_routes
-
-app.register_blueprint(client_routes)
-app.register_blueprint(admin_routes)
-
 # read configuration
 with open("config.json") as f:
     config = json.load(f)
@@ -46,7 +39,7 @@ PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
 app.config.from_object(__name__)
 Session(app)
 
-# error catchers
+# error handler
 @app.errorhandler(400)
 def error_400(e):
     return render_template("errors/400.html"), 400
@@ -58,6 +51,13 @@ def error_404(e):
 @app.errorhandler(500)
 def error_500(e):
     return render_template("errors/500.html"), 500
+
+# register routes
+from routes.client import client_routes
+from routes.admin import admin_routes
+
+app.register_blueprint(client_routes)
+app.register_blueprint(admin_routes)
 
 # run app
 if __name__ == '__main__':
