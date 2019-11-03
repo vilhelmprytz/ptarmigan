@@ -28,7 +28,7 @@ Tickets, Messages, Admins = get_database_objects()
 def index():
     return render_template("client/index.html")
 
-@client_routes.route("/submit", methods=["POST"])
+@client_routes.route("/submit", methods=["POST", "GET"])
 def submit():
     if request.method == "POST":
         data = request.form
@@ -56,7 +56,12 @@ def submit():
                 if len(value) > 500:
                     return f"value {value} of key {key} is too long", 400
         
-        # create object
+        # create objects
+        try:
+            ticket = Tickets.new(data["name"], data["email"], status=0)
+            message = Messages.new(ticket["id"], data["message"], 0) # sender_id=0 will always be client in conversation
+        except Exception as err:
+            return f"error occured, {err}"
 
     if request.method == "GET":
         return render_template("client/submit.html")

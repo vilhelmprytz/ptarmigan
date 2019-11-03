@@ -13,15 +13,10 @@
 #                                                         #
 ###########################################################
 
-from components.sql import sql_query
+import string
+import random
 
-from components.objects.Tickets import TicketsTable
-from components.objects.Messages import MessagesTable
-from components.objects.Admins import AdminsTable
+def random_string(length = 10):
+    """Generate a random string of fixed length"""
 
-def get_database_objects():
-    Tickets = TicketsTable()
-    Messages = MessagesTable()
-    Admins = AdminsTable()
-
-    return Tickets, Messages, Admins
+    return ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(length))
