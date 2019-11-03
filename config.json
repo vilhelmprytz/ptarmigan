@@ -1,0 +1,18 @@
+{
+    "settings": {
+        "session_path": "sessions"
+    },
+    "mysql": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": ""
+    },
+    "mail": {
+        "smtp_host": "",
+        "smtp_user": "",
+        "smtp_password": "",
+        "smtp_port": "",
+        "smtp_ssl": true
+    }
+}
