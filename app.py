@@ -1,13 +1,15 @@
 ###########################################################
-#    __ _           _           _   _      _        _     #
-#   / _| |         | |         | | (_)    | |      | |    #
-#  | |_| | __ _ ___| | ________| |_ _  ___| | _____| |_   #
-#  |  _| |/ _` / __| |/ /______| __| |/ __| |/ / _ \ __|  #
-#  | | | | (_| \__ \   <       | |_| | (__|   <  __/ |_   #
-#  |_| |_|\__,_|___/_|\_\       \__|_|\___|_|\_\___|\__|  #
+#         _                       _                       #
+#        | |                     (_)                      #
+#   _ __ | |_ __ _ _ __ _ __ ___  _  __ _  __ _ _ __      #
+#  | '_ \| __/ _` | '__| '_ ` _ \| |/ _` |/ _` | '_ \     #
+#  | |_) | || (_| | |  | | | | | | | (_| | (_| | | | |    #
+#  | .__/ \__\__,_|_|  |_| |_| |_|_|\__, |\__,_|_| |_|    #
+#  | |                               __/ |                #
+#  |_|                              |___/                 #
 #                                                         #
 # Copyright (C) 2019, Vilhelm Prytz <vilhelm@prytznet.se> #
-# https://github.com/VilhelmPrytz/flask-ticket            #
+# https://github.com/VilhelmPrytz/ptarmigan               #
 #                                                         #
 ###########################################################
 
@@ -18,7 +20,7 @@ from version import version
 import string
 import json
 
-print(f"Running flask-ticket version {version}")
+print(f"Running ptarmigan version {version}")
 
 # Session
 from flask_session.__init__ import Session

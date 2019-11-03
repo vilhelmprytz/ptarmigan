@@ -1,11 +1,12 @@
-# flask-ticket
+# ptarmigan
+[![Documentation Status](https://readthedocs.org/projects/ptarmigan/badge/?version=latest)](https://ptarmigan.readthedocs.io/en/latest/?badge=latest)
 
-Support ticket management system built in Flask.
+Support ticket management system built in Python 3 and Flask.
 
 ## Installation and Requirements
 
-Requires Python 3 and required modules listed in `requirements.txt` (can be installed using pip).
+Read more about installation and requirements in the [documentation](https://ptarmigan.readthedocs.io/).
 
 ## Contributing
 
-To be updated.
+Feel free to send a pull request or an issue. Ptarmigan uses the semantic versioning convention.
