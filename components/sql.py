@@ -34,7 +34,11 @@ def database_connection():
     return cnx, cursor
 
 def sql_query(query):
-    """Takes query as SQL query, returns status (True/False) and any message/result"""
+    """Performs specified SQL query on MySQL database
+    
+    arguments: query, SQL-query to be executed
+    returns: dictionary, status key with boolean value and result key with string value
+    """
 
     query_result = {"status": True}
 
