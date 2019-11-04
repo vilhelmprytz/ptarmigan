@@ -1,5 +1,5 @@
 # ptarmigan
-[![Documentation Status][documentation-badge]](https://ptarmigan.readthedocs.io/en/latest/?badge=latest) [![MIT License][license-badge]](LICENSE.md)
+[![Documentation Status][documentation-badge]](https://ptarmigan.readthedocs.io/en/latest/?badge=latest) [![MIT License][license-badge]](LICENSE)
 
 Support ticket management system built in Python 3 and Flask.
 
