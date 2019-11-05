@@ -32,6 +32,17 @@ app = Flask(__name__)
 with open("config.json") as f:
     config = json.load(f)
 
+# SQL
+app.config["SQLALCHEMY_DATABASE_URI"] = f'mysql+pymysql://{config["mysql"]["username"]}:{config["mysql"]["password"]}@{config["mysql"]["host"]}/{config["mysql"]["database"]}'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+from components.models import db
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 # Session Management
 SESSION_TYPE = 'filesystem'
 SESSION_FILE_DIR = config["settings"]["session_path"]

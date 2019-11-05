@@ -13,18 +13,18 @@
 #                                                         #
 ###########################################################
 
+# main imports
 from flask import Blueprint, render_template, request, redirect
+from components.models import Admin, Message, Ticket
+from components.models import db
 
-import sys
-sys.path.append('..')
+# tools/specific for this blueprint
+from components.tools import is_integer, random_string
 
-from components.database import get_database_objects
-from components.tools import is_integer
-
+# blueprint init
 client_routes = Blueprint('client_routes', __name__, template_folder='../templates')
 
-Tickets, Messages, Admins = get_database_objects()
-
+# routes
 @client_routes.route('/')
 def index():
     return render_template("client/index.html")
@@ -59,12 +59,21 @@ def submit():
         
         # create objects
         try:
-            ticket = Tickets.new(data["name"], data["email"], status=0)
-            message = Messages.new(ticket["id"], data["message"], 0) # sender_id=0 will always be client in conversation
+            ticket = Ticket(name=data["name"], email=data["email"], client_key=random_string(length = 15), status=0)
+            db.session.add(ticket)
+            db.session.flush()
+            message = Message(message=data["message"], sender_id=0, ticket_id=ticket.id) # sender_id=0 will always be client in conversation
+            db.session.add(message)
         except Exception as err:
             return f"error occured, {err}"
 
-        return redirect(f'/ticket?id={ticket["id"]}&key={ticket["client_key"]}')
+        # commit
+        try:
+            db.session.commit()
+        except Exception as err:
+            return f"error occured, {err}"
+
+        return redirect(f'/ticket?id={ticket.id}&key={ticket.client_key}')
 
     if request.method == "GET":
         return render_template("client/submit.html")
@@ -89,11 +98,11 @@ def ticket():
                 return "secret key is invalid length", 400
 
     # check if secret_key is correct
-    ticket = Tickets.get_id(id)
+    ticket = Ticket.query.get(data["id"])
 
-    if ticket["client_key"] != data["key"]:
+    if ticket.client_key != data["key"]:
         return "invalid secret key", 400
 
-    messages = Messages.get_ticket_id(id)
+    messages = Message.query.filter_by(ticket_id=data["id"])
 
     return render_template("client/ticket.html", ticket=ticket, messages=messages)

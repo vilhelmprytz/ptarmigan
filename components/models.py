@@ -1,3 +1,4 @@
+
 ###########################################################
 #         _                       _                       #
 #        | |                     (_)                      #
@@ -13,40 +14,37 @@
 #                                                         #
 ###########################################################
 
-from components.sql import sql_query
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 import hashlib, binascii, os
 
-class AdminsTable:
-    def __init__(self):
-        '''Initalizes Admins table'''
+db = SQLAlchemy()
 
-        self.name = 'Admins'
+class Ticket(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    client_key = db.Column(db.String(15), unique=True, nullable=False)
+    status = db.Column(db.Integer, unique=True, nullable=False)
+    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
+    messages = db.relationship('Message', backref='ticket', lazy=True)
 
-        result = sql_query('''CREATE TABLE Admins (
-            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(255),
-            email VARCHAR(255),
-            hashed_password VARCHAR(255),
-            creation_date DATETIME
-        ); ''')
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(255), unique=True, nullable=False)
+    sender_id = db.Column(db.Integer, unique=True, nullable=False)
+    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
 
-        if result["status"]:
-            return None
-
-        if f'''Table '{self.name}' already exists''' in result["result"]:
-            return None
-
-        raise Exception(f'unable to create table {self.name}, error message {result["result"]}')
-
-    def fetch_all(self):
-        '''Returns list of all Admins'''
-
-        query = sql_query(f'SELECT * FROM {self.name}')
-
-        if query["status"]:
-            return query["result"]
-
-        raise Exception(f'unable to get {self.name}, error {query["result"]}')
+class Admin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=True, nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    hashed_password = db.Column(db.String(255), unique=True, nullable=False)
+    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
     def hash_password(self, password):
         """Hash a password for storing"""
@@ -73,23 +71,3 @@ class AdminsTable:
         pwdhash = binascii.hexlify(pwdhash).decode('ascii')
         
         return pwdhash == stored_password
-
-    def new(self, name, email, raw_password):
-        hashed_password = self.hash_password(raw_password)
-
-        query = sql_query(f'''INSERT INTO {self.name} (name, email, hashed_password, creation_date)
-            VALUES ("{name}", "{email}", "{hashed_password}", CURRENT_TIMESTAMP())
-        ''')
-
-        if query["status"]:
-            return query["result"]
-
-        raise Exception(f'unable to create new {self.name}, error {query["result"]}')
-
-    def get_id(self, id):
-        query = sql_query(f'''SELECT * FROM {self.name} WHERE id={id}''')
-
-        if query["status"]:
-            return query["result"]
-        
-        raise Exception(f'unable to fetch obj using id from {self.name}, error {query["result"]}')
