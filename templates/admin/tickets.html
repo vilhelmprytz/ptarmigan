@@ -8,6 +8,8 @@
         <a href="/admin/logout"><p>Logout</p></a>
     </div>
 
+    <p>Viewing all open tickets</p>
+
     <table>
         <tr>
             <th>ID</th>
@@ -22,7 +24,17 @@
             <th><a href="/admin/tickets/{{ ticket.id }}">{{ ticket.id }}</a></th>
             <th>{{ ticket.name }}</th>
             <th>{{ ticket.email }}</th>
-            <th>{{ ticket.stauts }}</th>
+            {% if ticket.status is eq(0) %}
+            <th>Open</th>
+            {% elif ticket.status is eq(1) %}
+            <th>Customer-Reply</th>
+            {% elif ticket.status is eq(2) %}
+            <th>Answered</th>
+            {% elif ticket.status is eq(3) %}
+            <th>Closed</th>
+            {% else %}
+            <th>Unknown status, {{ ticket.status }}</th>
+            {% endif %}
             <th>{{ ticket.time_created }}</th>
             <th>{{ ticket.time_updated }}</th>
         </tr>

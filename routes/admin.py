@@ -35,7 +35,7 @@ def index():
 @admin_routes.route(BASEPATH + "/tickets")
 @admin_login_required
 def tickets():
-    tickets = Ticket.query.all()
+    tickets = Ticket.query.filter_by(status=0).order_by(Ticket.id.desc())
     return render_template("admin/tickets.html", tickets=tickets)
 
 @admin_routes.route(BASEPATH + "/tickets/<id>")
