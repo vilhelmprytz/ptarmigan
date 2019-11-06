@@ -6,16 +6,16 @@
         <p>Name: {{ ticket.name }}</p>
         <p>Email: {{ ticket.email }}</p>
         <p>Status: {{ ticket.status }}</p>
-        <p>Date: {{ ticket.time_created }}</p>
+        <p>Last updated: {{ ticket.time_updated }}</p>
     </div>
 
     <div class="messages">
         {% for message in messages %}
         <div class="message" id="{{ message['id'] }}">
             {% if message.sender_id is eq(0) %}
-            <div>Client</div>
+            <div>Client - {{ message.time_created }}</div>
             {% else %}
-            <div>{{ message.sender_id }}</div>
+            <div>{{ message.sender_id }} - {{ message.time_created }}</div>
             {% endif %}
             <div>{{ message["message"] }}</div>
         </div>
