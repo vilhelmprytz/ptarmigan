@@ -49,6 +49,16 @@ def view_ticket(id):
 
     return render_template("admin/view_ticket.html", ticket=ticket, messages=messages)
 
+@admin_routes.route(BASEPATH + "/submitmessage", methods=["POST"])
+@admin_login_required
+def admin_submit_message():
+    data = request.form
+
+    # validation check
+    for key, value in data.items():
+        if key != "message" and key != "ticket_id":
+            return "at least one valid key", 400
+
 @admin_routes.route(BASEPATH + "/login", methods=["POST", "GET"])
 def admin_login():
     if request.method == "POST":
@@ -76,6 +86,7 @@ def admin_login():
         # verify
         if Admin.verify_password(admin.hashed_password, data["password"]):
             session["admin_logged_in"] = True
+            session["admin_user_id"] = admin.id
         else:
             session["admin_logged_in"] = False
             return redirect(BASEPATH + "/login?fail=true")

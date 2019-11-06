@@ -16,6 +16,18 @@
         <p>Last updated: {{ ticket.time_updated }}</p>
     </div>
 
+    <div class="reply-form">
+        <form action="/admin/submitmessage" method="post">
+            <label>Message</label>
+            <input type="text" name="message" />
+
+            <input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
+    
+            <input type="submit" value="Send">
+        </form>
+    </div>
+    
+
     <table>
         <tr>
             <th>ID</th>
