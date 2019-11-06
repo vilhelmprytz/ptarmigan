@@ -46,7 +46,7 @@ class Admin(db.Model):
     time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
-    def hash_password(self, password):
+    def hash_password(password):
         """Hash a password for storing"""
 
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
@@ -57,7 +57,7 @@ class Admin(db.Model):
         
         return (salt + pwdhash).decode('ascii')
 
-    def verify_password(self, stored_password, provided_password):
+    def verify_password(stored_password, provided_password):
         """Verify a stored password against one provided by user"""
         
         salt = stored_password[:64]
