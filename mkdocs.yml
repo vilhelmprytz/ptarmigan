@@ -1,7 +1,8 @@
 site_name: ptarmigan
 repo_url: https://github.com/VilhelmPrytz/ptarmigan
+edit_uri: /tree/master/docs
 
-pages:
+nav:
   - Introduction: 'index.md'
   - Installation: 'installation.md'
 
