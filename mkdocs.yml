@@ -1,0 +1,10 @@
+site_name: ptarmigan
+repo_url: https://github.com/VilhelmPrytz/ptarmigan
+
+pages:
+  - Introduction: 'index.md'
+  - Installation: 'installation.md'
+
+theme: readthedocs
+markdown_extensions:
+    - admonition:
