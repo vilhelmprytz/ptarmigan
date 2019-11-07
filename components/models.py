@@ -32,7 +32,7 @@ class Ticket(db.Model):
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    message = db.Column(db.String(255), unique=False, nullable=False)
+    message = db.Column(db.String(500), unique=False, nullable=False)
     sender_id = db.Column(db.Integer, unique=False, nullable=False)
     time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
