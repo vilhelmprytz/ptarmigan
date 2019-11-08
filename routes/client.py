@@ -15,8 +15,7 @@
 
 # main imports
 from flask import Blueprint, render_template, request, redirect
-from components.models import Admin, Message, Ticket
-from components.models import db
+from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
 from components.tools import is_integer, random_string
@@ -103,6 +102,14 @@ def ticket():
     if ticket.client_key != data["key"]:
         return "invalid secret key", 400
 
-    messages = Message.query.filter_by(ticket_id=data["id"])
+    messages = Message.query.filter_by(ticket_id=data["id"]).order_by(Message.id.desc())
 
-    return render_template("client/ticket.html", ticket=ticket, messages=messages)
+    # build dict with admins
+    admins = Admin.query.all()
+
+    admin_names = {}
+
+    for admin in admins:
+        admin_names[admin.id] = admin.name
+
+    return render_template("client/ticket.html", ticket=ticket, messages=messages, admin_names=admin_names)

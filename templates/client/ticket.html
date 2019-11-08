@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Ticket #{{ ticket["id"] }}{% endblock %}
+{% block custom_head %}
+    <style>
+        /* This is temporary styling */
+        .message {
+            border-top: 6px solid red;
+            background-color: gainsboro;
+            margin-bottom: 20px;
+        }
+
+        .message-info {
+            padding: 0px;
+        }
+
+        .message-info p{
+            margin: 0px;
+        }
+    </style>
+{% endblock %}
 {% block body %}
     <div class="ticket">
         <p>ID: {{ ticket.id }}</p>
@@ -20,16 +38,26 @@
     </div>
 
     <div class="messages">
-        {% for message in messages %}
-        <div class="message" id="{{ message['id'] }}">
-            {% if message.sender_id is eq(0) %}
-            <div>Client - {{ message.time_created }}</div>
-            {% else %}
-            <div>{{ message.sender_id }} - {{ message.time_created }}</div>
-            {% endif %}
-            <div>{{ message["message"] }}</div>
+            {% for message in messages %}
+            <div class="message">
+                <div style="border-bottom: 3px solid {% if message.sender_id is eq(0) %}green{% else %}blue{% endif %};" class="message-info">
+                    <p>
+                        {% if message.sender_id is eq(0) %}
+                        <span>Client</span>
+                        {% else %}
+                        <span>{{ admin_names[message.sender_id] }}</span>
+                        {% endif %}
+                        <span>{{ message.time_created }}</span>
+                        {% if message.time_updated %}
+                        <span>Edited {{ message.time_updated }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="message-text">
+                    <p>{{ message.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
 {% endblock %}

@@ -15,8 +15,7 @@
 
 # main imports
 from flask import Blueprint, render_template, request, redirect, session
-from components.models import Admin, Message, Ticket
-from components.models import db
+from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
 from components.decorators import admin_login_required
@@ -24,6 +23,8 @@ from components.tools import is_integer
 
 # blueprint init
 admin_routes = Blueprint('admin_routes', __name__, template_folder='../templates')
+
+# blueprint global variables
 BASEPATH = '/admin'
 
 # routes
@@ -47,7 +48,15 @@ def view_ticket(id):
     ticket = Ticket.query.get(id)
     messages = Message.query.filter_by(ticket_id=int(id)).order_by(Message.id.desc())
 
-    return render_template("admin/view_ticket.html", ticket=ticket, messages=messages)
+    # build dict with admins
+    admins = Admin.query.all()
+
+    admin_names = {}
+
+    for admin in admins:
+        admin_names[admin.id] = admin.name
+
+    return render_template("admin/view_ticket.html", ticket=ticket, messages=messages, admin_names=admin_names)
 
 @admin_routes.route(BASEPATH + "/submitmessage", methods=["POST"])
 @admin_login_required
@@ -70,10 +79,10 @@ def admin_submit_message():
     # get ticket
     ticket = Ticket.query.get(int(data["ticket_id"]))
     
-    #try:
-    message = Message(message=data["message"], sender_id=int(session.get("admin_user_id")), ticket_id=int(data["ticket_id"]))
-    #except Exception:
-        #return "ticket id does not exist", 400
+    try:
+        message = Message(message=data["message"], sender_id=int(session.get("admin_user_id")), ticket_id=int(data["ticket_id"]))
+    except Exception:
+        return "ticket id does not exist", 400
 
     try:
         db.session.add(message)

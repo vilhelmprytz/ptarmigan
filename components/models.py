@@ -20,24 +20,6 @@ import hashlib, binascii, os
 
 db = SQLAlchemy()
 
-class Ticket(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), unique=False, nullable=False)
-    email = db.Column(db.String(255), unique=False, nullable=False)
-    client_key = db.Column(db.String(15), unique=False, nullable=False)
-    status = db.Column(db.Integer, unique=False, nullable=False)
-    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
-    messages = db.relationship('Message', backref='ticket', lazy=True)
-
-class Message(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    message = db.Column(db.String(500), unique=False, nullable=False)
-    sender_id = db.Column(db.Integer, unique=False, nullable=False)
-    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
-    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
-    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
-
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=False, nullable=False)
@@ -46,7 +28,7 @@ class Admin(db.Model):
     time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
-    def hash_password(password):
+    def hash_password(self, password):
         """Hash a password for storing"""
 
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
@@ -57,7 +39,7 @@ class Admin(db.Model):
         
         return (salt + pwdhash).decode('ascii')
 
-    def verify_password(stored_password, provided_password):
+    def verify_password(self, stored_password, provided_password):
         """Verify a stored password against one provided by user"""
         
         salt = stored_password[:64]
@@ -71,3 +53,21 @@ class Admin(db.Model):
         pwdhash = binascii.hexlify(pwdhash).decode('ascii')
         
         return pwdhash == stored_password
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(500), unique=False, nullable=False)
+    sender_id = db.Column(db.Integer, unique=False, nullable=False)
+    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
+    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
+
+class Ticket(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), unique=False, nullable=False)
+    email = db.Column(db.String(255), unique=False, nullable=False)
+    client_key = db.Column(db.String(15), unique=False, nullable=False)
+    status = db.Column(db.Integer, unique=False, nullable=False)
+    time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
+    messages = db.relationship('Message', backref='ticket', lazy=True)
