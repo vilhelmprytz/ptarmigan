@@ -14,19 +14,22 @@
 ###########################################################
 
 # main imports
-from flask import Blueprint, render_template, request, redirect
+from flask import Blueprint, render_template, request, redirect, session
 from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
-from components.tools import is_integer, random_string
+from components.tools import is_integer, random_string, read_configuration
 
 # blueprint init
 client_routes = Blueprint('client_routes', __name__, template_folder='../templates')
 
+# blueprint global variables
+config = read_configuration()
+
 # routes
-@client_routes.route('/')
+@client_routes.route("/")
 def index():
-    return render_template("client/index.html")
+    return render_template("client/index.html", name=config["settings"]["name"], admin_status=session.get("admin_logged_in"))
 
 @client_routes.route("/submit", methods=["POST", "GET"])
 def submit():
@@ -72,10 +75,19 @@ def submit():
         except Exception as err:
             return f"error occured, {err}"
 
+        # trigger update
+        ticket = Ticket.query.get(ticket.id)
+        ticket.status = 1
+        db.session.commit()
+
+        ticket = Ticket.query.get(ticket.id)
+        ticket.status = 0
+        db.session.commit()
+
         return redirect(f'/ticket?id={ticket.id}&key={ticket.client_key}')
 
     if request.method == "GET":
-        return render_template("client/submit.html")
+        return render_template("client/submit.html", name=config["settings"]["name"], admin_status=session.get("admin_logged_in"), fail=request.args.get("fail"), success=request.args.get("success"))
 
 @client_routes.route("/ticket")
 def ticket():
@@ -85,7 +97,7 @@ def ticket():
         return "missing arguments", 400
 
     for key, value in data.items():
-        if key != "id" and key != "key":
+        if key != "id" and key != "key" and key != "success" and key != "fail":
             return "at least one invalid variable", 400
 
         if key == "id":
@@ -112,4 +124,45 @@ def ticket():
     for admin in admins:
         admin_names[admin.id] = admin.name
 
-    return render_template("client/ticket.html", ticket=ticket, messages=messages, admin_names=admin_names)
+    return render_template("client/ticket.html", name=config["settings"]["name"], admin_status=session.get("admin_logged_in"), ticket=ticket, messages=messages, admin_names=admin_names, fail=request.args.get("fail"), success=request.args.get("success"))
+
+@client_routes.route("/submitmessage", methods=["POST"])
+def submitmessage():
+    data = request.form
+
+    if not data or len(data) < 3:
+        return "missing arguments", 400
+
+    for key, value in data.items():
+        if key != "message" and key != "ticket_id" and key != "client_key":
+            return "at least one invalid variable", 400
+        
+        if key == "ticket_id":
+            if not is_integer(value):
+                return "id must be integer", 400
+
+        if key == "message":
+            if len(value) > 500:
+                return f"value {value} of key {key} is too long", 400
+    
+    # check if secret_key is correct
+    ticket = Ticket.query.get(data["ticket_id"])
+
+    if ticket.client_key != data["client_key"]:
+        return "invalid secret key", 400
+
+    try:
+        message = Message(message=data["message"], sender_id=0, ticket_id=int(data["ticket_id"]))
+    except Exception:
+        return "ticket id does not exist", 400
+
+    # update status
+    ticket.status = 1
+
+    try:
+        db.session.add(message)
+        db.session.commit()
+    except Exception:
+        return "unable to create message", 400
+
+    return redirect(f"/ticket?id={ticket.id}&key={ticket.client_key}&success=Meddelandet%20skickat!")

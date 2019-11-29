@@ -1,5 +1,2 @@
-# next-release
-* 
-
-# v0.0.1 (release on )
+# v0.0.1 (active development)
 * Inital release

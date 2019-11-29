@@ -1,13 +1,28 @@
 {% extends "base.html" %}
-{% block title %}Admin Login{% endblock %}
+{% block title %}{{ name }} - Admin Login{% endblock %}
 {% block body %}
-    <form action="/admin/login" method="post">
-        <label>E-mail</label>
-        <input type="email" name="email" />
+    {% if fail %}
+    <div class="alert alert-danger" role="alert">
+        <p>{{ fail }}</p>
+    </div>
+    {% endif %}
 
-        <label>Password</label>
-        <input type="password" name="password" />
+    {% if success %}
+    <div class="alert alert-success" role="alert">
+        <p>{{ success }}</p>
+    </div>
+    {% endif %}
 
-        <input type="submit" value="Login">
+    <form action="/admin/login", method="post">
+        <div class="form-group">
+            <label for="email">Email address</label>
+            <input name="email" type="email" class="form-control" id="email" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input name="password" type="password" class="form-control" id="password" placeholder="Password">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}

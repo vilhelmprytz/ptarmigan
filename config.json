@@ -1,5 +1,6 @@
 {
     "settings": {
+        "name": "Ptarmigan",
         "session_path": "sessions"
     },
     "mysql": {

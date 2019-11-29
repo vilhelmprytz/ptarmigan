@@ -1,16 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Submit Ticket{% endblock %}
+{% block title %}{{ name }} - Submit Ticket{% endblock %}
 {% block body %}
+{% include "client/navbar.html" %}
+    {% if fail %}
+    <div class="alert alert-danger" role="alert">
+        <p>{{ fail }}</p>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success" role="alert">
+        <p>{{ success }}</p>
+    </div>
+    {% endif %}
+
     <form action="/submit" method="post">
-        <label>Namn</label>
-        <input type="text" name="name" />
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input name="name" type="text" class="form-control" id="name" aria-describedby="nameHelp" placeholder="Enter your name">
+            <small id="nameHelp" class="form-text text-muted">Enter your full name.</small>
+        </div>
 
-        <label>E-mail</label>
-        <input type="email" name="email" />
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input name="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+            <small id="emailHelp" class="form-text text-muted">Enter a valid email address, ticket updates will be sent to this address.</small>
+        </div>
 
-        <label>Message</label>
-        <input type="text" name="message" />
+        <div class="form-group">
+            <label for="message">Message</label>
+            <textarea name="message" class="form-control" id="message" rows="3"></textarea>
+        </div>
 
-        <input type="submit" value="Send">
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 {% endblock %}

@@ -1,24 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Ticket #{{ ticket["id"] }}{% endblock %}
+{% block title %}{{ name }} - Ticket #{{ ticket["id"] }}{% endblock %}
 {% block custom_head %}
     <style>
-        /* This is temporary styling */
-        .message {
-            border-top: 6px solid red;
-            background-color: gainsboro;
-            margin-bottom: 20px;
-        }
-
-        .message-info {
-            padding: 0px;
-        }
-
-        .message-info p{
-            margin: 0px;
+        .mb-1 {
+            min-height: 24px;
         }
     </style>
 {% endblock %}
 {% block body %}
+{% include "client/navbar.html" %}
     <div class="ticket">
         <p>ID: {{ ticket.id }}</p>
         <p>Name: {{ ticket.name }}</p>
@@ -37,27 +27,51 @@
         <p>Last updated: {{ ticket.time_updated }}</p>
     </div>
 
-    <div class="messages">
-            {% for message in messages %}
-            <div class="message">
-                <div style="border-bottom: 3px solid {% if message.sender_id is eq(0) %}green{% else %}blue{% endif %};" class="message-info">
-                    <p>
-                        {% if message.sender_id is eq(0) %}
-                        <span>Client</span>
-                        {% else %}
-                        <span>{{ admin_names[message.sender_id] }}</span>
-                        {% endif %}
-                        <span>{{ message.time_created }}</span>
-                        {% if message.time_updated %}
-                        <span>Edited {{ message.time_updated }}</span>
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="message-text">
-                    <p>{{ message.message }}</p>
-                </div>
+    {% if fail %}
+    <div class="alert alert-danger" role="alert">
+        <p>{{ fail }}</p>
+    </div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success" role="alert">
+        <p>{{ success }}</p>
+    </div>
+    {% endif %}
+
+    <div class="reply-form">
+        <form action="/submitmessage" method="post">
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea name="message" class="form-control" id="message" rows="3"></textarea>
             </div>
-            {% endfor %}
-        </div>
+
+            <input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
+            <input type="hidden" name="client_key" value="{{ ticket.client_key }}" />
+
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+
+    <div id="messages" class="list-group">
+        {% for message in messages %}
+        <a id="message" class="list-group-item list-group-item-action flex-column align-items-start {% if message.sender_id is eq(0) %}{% else %}{% endif %}">
+                <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">
+                    {% if message.sender_id is eq(0) %} 
+                    Client
+                    {% else %}
+                    {{ admin_names[message.sender_id] }}
+                    {% endif %}
+                </h5>
+                <small>{{ message.time_created }} </small>
+                </div>
+                {% for line in message.message.split("\n") %}
+                <p class="mb-1">{{ line }}</p>
+                {% endfor %}
+                <small>{% if message.time_updated %}Edited {{ message.time_updated }}.{% else %}Message has not been edited.{% endif %}</small>
+        </a>
+        {% endfor %}
+    </div>
 
 {% endblock %}

@@ -17,7 +17,8 @@ from flask import Flask, render_template, redirect
 from datetime import timedelta, datetime
 from version import version
 import string
-import json
+
+from components.tools import read_configuration
 
 print(f"Running ptarmigan version {version}")
 
@@ -28,8 +29,7 @@ from flask_session.__init__ import Session
 app = Flask(__name__)
 
 # read configuration
-with open("config.json") as f:
-    config = json.load(f)
+config = read_configuration()
 
 # SQL
 app.config["SQLALCHEMY_DATABASE_URI"] = f'mysql+pymysql://{config["mysql"]["username"]}:{config["mysql"]["password"]}@{config["mysql"]["host"]}/{config["mysql"]["database"]}'

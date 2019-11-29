@@ -1,43 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Admin View Ticket{% endblock %}
+{% block title %}{{ name }} - Admin View Ticket{% endblock %}
 {% block body %}
-    <div>
-        <h1>Admin View Tickets</h1>
-        <a href="/admin"><p>Admin Dashboard</p></a>
-        <a href="/admin/tickets"><p>Admin View Tickets</p></a>
-        <a href="/admin/logout"><p>Logout</p></a>
-    </div>
+{% include "admin/navbar.html" %}
+    <p>{{ view_msg }}</p>
 
-    <p>Viewing all open tickets</p>
+    <a href="/admin/tickets"><button class="btn btn-primary">View Active Tickets</button></a>
+    <a href="/admin/tickets?status=2"><button class="btn btn-primary">View Answered Tickets</button></a>
+    <a href="/admin/tickets?status=3"><button class="btn btn-primary">View Closed Tickets</button></a>
 
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Time Created</th>
-            <th>Time Updated</th>
-        </tr>
+    <div class="list-group">
         {% for ticket in tickets %}
-        <tr>
-            <th><a href="/admin/tickets/{{ ticket.id }}">{{ ticket.id }}</a></th>
-            <th>{{ ticket.name }}</th>
-            <th>{{ ticket.email }}</th>
-            {% if ticket.status is eq(0) %}
-            <th>Open</th>
-            {% elif ticket.status is eq(1) %}
-            <th>Customer-Reply</th>
-            {% elif ticket.status is eq(2) %}
-            <th>Answered</th>
-            {% elif ticket.status is eq(3) %}
-            <th>Closed</th>
-            {% else %}
-            <th>Unknown status, {{ ticket.status }}</th>
-            {% endif %}
-            <th>{{ ticket.time_created }}</th>
-            <th>{{ ticket.time_updated }}</th>
-        </tr>
+
+        <a href="/admin/tickets/{{ ticket.id }}" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">
+                #{{ ticket.id }} -
+                {% if ticket.status is eq(0) %}
+                    Open
+                {% elif ticket.status is eq(1) %}
+                    Customer-Reply
+                {% elif ticket.status is eq(2) %}
+                    Answered
+                {% elif ticket.status is eq(3) %}
+                    Closed
+                {% else %}
+                    Unknown status, {{ ticket.status }}
+                {% endif %}
+            </h5>
+            <small class="text-muted">{{ ticket.time_updated }}</small>
+            </div>
+            <p class="mb-1">Submitted by {{ ticket.name }} on {{ ticket.time_created }}.</p>
+            <small class="text-muted">{{ ticket.email }}</small>
+        </a>
         {% endfor %}
     </table>
 {% endblock %}

@@ -14,6 +14,7 @@
 ###########################################################
 
 import string
+import json
 import random
 
 def random_string(length = 10):
@@ -28,3 +29,11 @@ def is_integer(string):
         return False
     
     return True
+
+def read_configuration():
+    """Returns JSON object with configuration"""
+
+    with open("config.json") as f:
+        config = json.load(f)
+
+    return config
