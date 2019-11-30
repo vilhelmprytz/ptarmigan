@@ -17,18 +17,23 @@ import string
 import json
 import random
 
-def random_string(length = 10):
+
+def random_string(length=10):
     """Generate a random string of fixed length"""
 
-    return ''.join(random.choice(string.ascii_lowercase + string.digits) for i in range(length))
+    return "".join(
+        random.choice(string.ascii_lowercase + string.digits) for i in range(length)
+    )
+
 
 def is_integer(string):
     try:
         try_int = int(string)
     except Exception:
         return False
-    
+
     return True
+
 
 def read_configuration():
     """Returns JSON object with configuration"""

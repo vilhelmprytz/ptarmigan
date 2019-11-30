@@ -1,4 +1,3 @@
-
 ###########################################################
 #         _                       _                       #
 #        | |                     (_)                      #
@@ -20,6 +19,7 @@ import hashlib, binascii, os
 
 db = SQLAlchemy()
 
+
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=False, nullable=False)
@@ -31,28 +31,27 @@ class Admin(db.Model):
     def hash_password(self, password):
         """Hash a password for storing"""
 
-        salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
-        pwdhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'), 
-                                    salt, 100000)
-        
+        salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
+        pwdhash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
+
         pwdhash = binascii.hexlify(pwdhash)
-        
-        return (salt + pwdhash).decode('ascii')
+
+        return (salt + pwdhash).decode("ascii")
 
     def verify_password(self, stored_password, provided_password):
         """Verify a stored password against one provided by user"""
-        
+
         salt = stored_password[:64]
         stored_password = stored_password[64:]
-        
-        pwdhash = hashlib.pbkdf2_hmac('sha512', 
-                                        provided_password.encode('utf-8'), 
-                                        salt.encode('ascii'), 
-                                        100000)
-        
-        pwdhash = binascii.hexlify(pwdhash).decode('ascii')
-        
+
+        pwdhash = hashlib.pbkdf2_hmac(
+            "sha512", provided_password.encode("utf-8"), salt.encode("ascii"), 100000
+        )
+
+        pwdhash = binascii.hexlify(pwdhash).decode("ascii")
+
         return pwdhash == stored_password
+
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -60,7 +59,8 @@ class Message(db.Model):
     sender_id = db.Column(db.Integer, unique=False, nullable=False)
     time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
-    ticket_id = db.Column(db.Integer, db.ForeignKey('ticket.id'), nullable=False)
+    ticket_id = db.Column(db.Integer, db.ForeignKey("ticket.id"), nullable=False)
+
 
 class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,4 +70,4 @@ class Ticket(db.Model):
     status = db.Column(db.Integer, unique=False, nullable=False)
     time_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
     time_updated = db.Column(db.DateTime(timezone=True), onupdate=func.now())
-    messages = db.relationship('Message', backref='ticket', lazy=True)
+    messages = db.relationship("Message", backref="ticket", lazy=True)

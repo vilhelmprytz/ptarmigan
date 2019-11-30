@@ -33,10 +33,12 @@ config = read_configuration()
 
 # SQL
 mysql_password = ":" + config["mysql"]["password"]
-if config["mysql"]["password"] == "": # if password is empty
+if config["mysql"]["password"] == "":  # if password is empty
     mysql_password = ""
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f'mysql+pymysql://{config["mysql"]["username"]}{mysql_password}@{config["mysql"]["host"]}/{config["mysql"]["database"]}'
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = f'mysql+pymysql://{config["mysql"]["username"]}{mysql_password}@{config["mysql"]["host"]}/{config["mysql"]["database"]}'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 from components.models import db
@@ -47,7 +49,7 @@ with app.app_context():
     db.create_all()
 
 # Session Management
-SESSION_TYPE = 'filesystem'
+SESSION_TYPE = "filesystem"
 SESSION_FILE_DIR = config["settings"]["session_path"]
 SESSION_PERMANENT = True
 PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
@@ -60,13 +62,16 @@ Session(app)
 def error_400(e):
     return render_template("errors/400.html"), 400
 
+
 @app.errorhandler(404)
 def error_404(e):
     return render_template("errors/404.html"), 404
 
+
 @app.errorhandler(500)
 def error_500(e):
     return render_template("errors/500.html"), 500
+
 
 # register routes
 from routes.client import client_routes
@@ -76,5 +81,5 @@ app.register_blueprint(client_routes)
 app.register_blueprint(admin_routes)
 
 # run app
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(host="0.0.0.0")

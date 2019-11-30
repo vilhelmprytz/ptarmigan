@@ -24,10 +24,10 @@ from sqlalchemy import or_
 from version import version
 
 # blueprint init
-admin_routes = Blueprint('admin_routes', __name__, template_folder='../templates')
+admin_routes = Blueprint("admin_routes", __name__, template_folder="../templates")
 
 # blueprint global variables
-BASEPATH = '/admin'
+BASEPATH = "/admin"
 config = read_configuration()
 
 # routes
@@ -38,12 +38,21 @@ def index():
     messages = Message.query.all()
     admins = Admin.query.all()
 
-    return render_template("admin/dashboard.html", name=config["settings"]["name"], num_tickets=len(tickets), num_messages=len(messages), num_admins=len(admins), version=version)
+    return render_template(
+        "admin/dashboard.html",
+        name=config["settings"]["name"],
+        num_tickets=len(tickets),
+        num_messages=len(messages),
+        num_admins=len(admins),
+        version=version,
+    )
+
 
 @admin_routes.route(BASEPATH + "/system")
 @admin_login_required
 def system():
     return render_template("admin/system.html", name=config["settings"]["name"])
+
 
 @admin_routes.route(BASEPATH + "/tickets")
 @admin_login_required
@@ -52,28 +61,35 @@ def tickets():
 
     if data:
         if int(data["status"]) == 3:
-            tickets = Ticket.query.filter_by(status=3).order_by(Ticket.time_updated.asc())
+            tickets = Ticket.query.filter_by(status=3).order_by(
+                Ticket.time_updated.asc()
+            )
             view_msg = "Viewing closed tickets"
         elif int(data["status"]) == 2:
-            tickets = Ticket.query.filter_by(status=2).order_by(Ticket.time_updated.asc())
+            tickets = Ticket.query.filter_by(status=2).order_by(
+                Ticket.time_updated.asc()
+            )
             view_msg = "Viewing answered tickets"
     else:
         tickets = Ticket.query.filter(
-            or_(
-                Ticket.status.contains([0]),
-                Ticket.status.contains([1])
-            )
+            or_(Ticket.status.contains([0]), Ticket.status.contains([1]))
         ).order_by(Ticket.time_updated.asc())
         view_msg = "Viewing active tickets"
 
-    return render_template("admin/tickets.html", name=config["settings"]["name"], tickets=tickets, view_msg=view_msg)
+    return render_template(
+        "admin/tickets.html",
+        name=config["settings"]["name"],
+        tickets=tickets,
+        view_msg=view_msg,
+    )
+
 
 @admin_routes.route(BASEPATH + "/tickets/<id>")
 @admin_login_required
 def view_ticket(id):
     if not is_integer(id):
         return "id has to be integer", 400
-    
+
     ticket = Ticket.query.get(id)
     messages = Message.query.filter_by(ticket_id=int(id)).order_by(Message.id.desc())
 
@@ -85,7 +101,16 @@ def view_ticket(id):
     for admin in admins:
         admin_names[admin.id] = admin.name
 
-    return render_template("admin/view_ticket.html", name=config["settings"]["name"], ticket=ticket, messages=messages, admin_names=admin_names, fail=request.args.get("fail"), success=request.args.get("success"))
+    return render_template(
+        "admin/view_ticket.html",
+        name=config["settings"]["name"],
+        ticket=ticket,
+        messages=messages,
+        admin_names=admin_names,
+        fail=request.args.get("fail"),
+        success=request.args.get("success"),
+    )
+
 
 @admin_routes.route(BASEPATH + "/submitmessage", methods=["POST"])
 @admin_login_required
@@ -107,14 +132,18 @@ def admin_submit_message():
 
     # get ticket
     ticket = Ticket.query.get(int(data["ticket_id"]))
-    
+
     try:
-        message = Message(message=data["message"], sender_id=int(session.get("admin_user_id")), ticket_id=int(data["ticket_id"]))
+        message = Message(
+            message=data["message"],
+            sender_id=int(session.get("admin_user_id")),
+            ticket_id=int(data["ticket_id"]),
+        )
     except Exception:
         return "ticket id does not exist", 400
 
     # update status
-    ticket.status = 2        
+    ticket.status = 2
 
     try:
         db.session.add(message)
@@ -122,7 +151,10 @@ def admin_submit_message():
     except Exception:
         return "unable to create message", 400
 
-    return redirect(BASEPATH + f'/tickets/{data["ticket_id"]}?success=Meddelandet%20skickat!')
+    return redirect(
+        BASEPATH + f'/tickets/{data["ticket_id"]}?success=Meddelandet%20skickat!'
+    )
+
 
 @admin_routes.route(BASEPATH + "/ticket_status", methods=["POST"])
 @admin_login_required
@@ -133,24 +165,25 @@ def admin_ticket_status():
     for key, value in data.items():
         if key != "ticket_id" and key != "status":
             return "at least one invalid key", 400
-        
+
         if not is_integer(value):
             return "values have to be integers", 400
-        
+
     # get ticket
     try:
         ticket = Ticket.query.get(int(data["ticket_id"]))
     except Exception:
         return "ticket id does not exist", 400
-    
+
     ticket.status = int(data["status"])
 
     try:
         db.session.commit()
     except Exception:
         return "unable to update ticket status", 500
-    
+
     return redirect(BASEPATH + f"/tickets/{ticket.id}?success=Status%20ändrats.")
+
 
 @admin_routes.route(BASEPATH + "/login", methods=["POST", "GET"])
 def admin_login():
@@ -161,10 +194,10 @@ def admin_login():
         for key, value in data.items():
             if key != "email" and key != "password":
                 return "at least one invalid key", 400
-        
+
             if len(value) < 3:
                 return f"{key} is too short", 400
-                
+
             if key == "email":
                 if len(value) > 50:
                     return f"value {value} of key {key} is too long", 400
@@ -172,9 +205,11 @@ def admin_login():
                     return f"value {value} of key {key} is missing @", 400
                 if "." not in value:
                     return f"value {value} of key {key} is missing .", 400
-        
+
         # check authentication
-        admin = Admin.query.filter_by(email=data["email"])[0] # should always only be one admin with this name
+        admin = Admin.query.filter_by(email=data["email"])[
+            0
+        ]  # should always only be one admin with this name
 
         # verify
         if Admin.verify_password(Admin, admin.hashed_password, data["password"]):
@@ -183,11 +218,17 @@ def admin_login():
         else:
             session["admin_logged_in"] = False
             return redirect(BASEPATH + "/login?fail=Fel%20lösenord.")
-        
+
         return redirect(BASEPATH)
-        
+
     elif request.method == "GET":
-        return render_template("admin/login.html", name=config["settings"]["name"], fail=request.args.get("fail"), success=request.args.get("success"))
+        return render_template(
+            "admin/login.html",
+            name=config["settings"]["name"],
+            fail=request.args.get("fail"),
+            success=request.args.get("success"),
+        )
+
 
 @admin_routes.route(BASEPATH + "/logout")
 def admin_logout():
