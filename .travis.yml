@@ -4,6 +4,7 @@ services:
   - mysql
 
 before_install:
+  - mysql -e 'CREATE DATABASE ptarmigan;'
   - python -m pip install --upgrade pip
   - pip install -r requirements.txt
 
