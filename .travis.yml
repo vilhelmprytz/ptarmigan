@@ -1,5 +1,7 @@
 sudo: required
 language: python
+services:
+  - mysql
 
 before_install:
   - python -m pip install --upgrade pip
