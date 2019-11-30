@@ -32,7 +32,11 @@ app = Flask(__name__)
 config = read_configuration()
 
 # SQL
-app.config["SQLALCHEMY_DATABASE_URI"] = f'mysql+pymysql://{config["mysql"]["username"]}:{config["mysql"]["password"]}@{config["mysql"]["host"]}/{config["mysql"]["database"]}'
+mysql_password = ":" + config["mysql"]["password"]
+if config["mysql"]["password"] == "": # if password is empty
+    mysql_password = ""
+
+app.config["SQLALCHEMY_DATABASE_URI"] = f'mysql+pymysql://{config["mysql"]["username"]}{mysql_password}@{config["mysql"]["host"]}/{config["mysql"]["database"]}'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 from components.models import db

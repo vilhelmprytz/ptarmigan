@@ -6,7 +6,7 @@
     "mysql": {
         "host": "127.0.0.1",
         "username": "root",
-        "password": "hej123",
+        "password": "",
         "database": "ptarmigan"
     },
     "mail": {
