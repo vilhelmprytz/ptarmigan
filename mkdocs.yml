@@ -5,6 +5,7 @@ edit_uri: /tree/master/docs
 nav:
   - Introduction: 'index.md'
   - Installation: 'installation.md'
+  - Development: 'development.md'
 
 theme: readthedocs
 markdown_extensions:
