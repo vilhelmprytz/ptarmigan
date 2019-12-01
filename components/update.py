@@ -12,3 +12,19 @@
 # https://github.com/VilhelmPrytz/ptarmigan               #
 #                                                         #
 ###########################################################
+
+import requests
+
+
+def check_for_new_releases():
+    r = requests.get("https://api.github.com/repos/VilhelmPrytz/ptarmigan/tags")
+
+    if r.status_code == requests.codes.ok:
+        try:
+            latest_release = r.json()[0]["name"]
+        except Exception:
+            return False, "Unable to retrieve latest version."
+    else:
+        return False, "Unable to retrieve latest version"
+
+    return True, latest_release

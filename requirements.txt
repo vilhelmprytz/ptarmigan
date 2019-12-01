@@ -2,3 +2,4 @@ flask
 flask_session
 Flask-SQLAlchemy
 pymysql
+requests

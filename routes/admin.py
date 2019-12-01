@@ -20,6 +20,7 @@ from components.models import db, Admin, Message, Ticket
 # tools/specific for this blueprint
 from components.decorators import admin_login_required
 from components.tools import is_integer, read_configuration
+from components.update import check_for_new_releases
 from sqlalchemy import or_
 from version import version
 
@@ -51,7 +52,15 @@ def index():
 @admin_routes.route(BASEPATH + "/system")
 @admin_login_required
 def system():
-    return render_template("admin/system.html", name=config["settings"]["name"])
+    status, new_release = check_for_new_releases()
+
+    return render_template(
+        "admin/system.html",
+        name=config["settings"]["name"],
+        status=status,
+        new_release=new_release,
+        version=version,
+    )
 
 
 @admin_routes.route(BASEPATH + "/tickets")
