@@ -88,9 +88,24 @@ def tickets():
 @admin_login_required
 def view_ticket(id):
     if not is_integer(id):
-        return "id has to be integer", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Id has to be integer."
+            ),
+            400,
+        )
 
     ticket = Ticket.query.get(id)
+
+    # if ticket does not exist in database
+    if not ticket:
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Ticket does not exist."
+            ),
+            400,
+        )
+
     messages = Message.query.filter_by(ticket_id=int(id)).order_by(Message.id.desc())
 
     # build dict with admins
@@ -120,15 +135,31 @@ def admin_submit_message():
     # validation check
     for key, value in data.items():
         if key != "message" and key != "ticket_id":
-            return "at least one invalid key", 400
+            return redirect(
+                BASEPATH + f"/tickets/{data['ticket_id']}?fail=Invalid keys were sent."
+            )
 
         if key == "ticket_id":
             if not is_integer(value):
-                return "ticket_id has to be integer", 400
+                return (
+                    render_template(
+                        "errors/custom.html",
+                        title="400",
+                        message="ticket_id has to be integer.",
+                    ),
+                    400,
+                )
 
         if key == "message":
             if len(value) > 500:
-                return "message too long", 400
+                return redirect(
+                    BASEPATH + f"/tickets/{data['ticket_id']}?fail=Message too long."
+                )
+
+            if len(value) < 3:
+                return redirect(
+                    BASEPATH + f"/tickets/{data['ticket_id']}?fail=Message too short."
+                )
 
     # get ticket
     ticket = Ticket.query.get(int(data["ticket_id"]))
@@ -140,7 +171,12 @@ def admin_submit_message():
             ticket_id=int(data["ticket_id"]),
         )
     except Exception:
-        return "ticket id does not exist", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Ticket ID does not exist."
+            ),
+            400,
+        )
 
     # update status
     ticket.status = 2
@@ -149,11 +185,12 @@ def admin_submit_message():
         db.session.add(message)
         db.session.commit()
     except Exception:
-        return "unable to create message", 400
+        return redirect(
+            BASEPATH
+            + f"/tickets/{data['ticket_id']}?fail=Server error, could not create message."
+        )
 
-    return redirect(
-        BASEPATH + f'/tickets/{data["ticket_id"]}?success=Meddelandet%20skickat!'
-    )
+    return redirect(BASEPATH + f'/tickets/{data["ticket_id"]}?success=Message sent!')
 
 
 @admin_routes.route(BASEPATH + "/ticket_status", methods=["POST"])
@@ -164,25 +201,36 @@ def admin_ticket_status():
     # validation check
     for key, value in data.items():
         if key != "ticket_id" and key != "status":
-            return "at least one invalid key", 400
+            return redirect(
+                BASEPATH + f"/tickets/{ticket.id}?fail=Invalid keys were sent."
+            )
 
         if not is_integer(value):
-            return "values have to be integers", 400
+            return redirect(
+                BASEPATH + f"/tickets/{ticket.id}?fail=Values have to be integers."
+            )
 
     # get ticket
     try:
         ticket = Ticket.query.get(int(data["ticket_id"]))
     except Exception:
-        return "ticket id does not exist", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Ticket ID does not exist."
+            ),
+            400,
+        )
 
     ticket.status = int(data["status"])
 
     try:
         db.session.commit()
     except Exception:
-        return "unable to update ticket status", 500
+        return redirect(
+            BASEPATH + f"/tickets/{ticket.id}?fail=Unable to update status."
+        )
 
-    return redirect(BASEPATH + f"/tickets/{ticket.id}?success=Status%20ändrats.")
+    return redirect(BASEPATH + f"/tickets/{ticket.id}?success=Status has been updated.")
 
 
 @admin_routes.route(BASEPATH + "/login", methods=["POST", "GET"])
@@ -193,23 +241,31 @@ def admin_login():
         # validation check
         for key, value in data.items():
             if key != "email" and key != "password":
-                return "at least one invalid key", 400
+                return redirect(BASEPATH + "/login?fail=Invalid keys were sent.")
 
             if len(value) < 3:
-                return f"{key} is too short", 400
+                return redirect(BASEPATH + f"/login?fail={key} is too short.")
 
             if key == "email":
                 if len(value) > 50:
-                    return f"value {value} of key {key} is too long", 400
+                    return redirect(
+                        BASEPATH + f"/login?fail=Value {value} of key {key} is too long"
+                    )
                 if "@" not in value:
-                    return f"value {value} of key {key} is missing @", 400
+                    return redirect(
+                        BASEPATH
+                        + f"/login?fail=Value {value} of key {key} is missing @"
+                    )
                 if "." not in value:
-                    return f"value {value} of key {key} is missing .", 400
+                    return redirect(
+                        BASEPATH
+                        + f"/login?fail=Value {value} of key {key} is missing ."
+                    )
 
         # check authentication
         admin = Admin.query.filter_by(email=data["email"])[
             0
-        ]  # should always only be one admin with this name
+        ]  # should always only be one admin with this email
 
         # verify
         if Admin.verify_password(Admin, admin.hashed_password, data["password"]):
@@ -217,7 +273,7 @@ def admin_login():
             session["admin_user_id"] = admin.id
         else:
             session["admin_logged_in"] = False
-            return redirect(BASEPATH + "/login?fail=Fel%20lösenord.")
+            return redirect(BASEPATH + "/login?fail=Wrong password.")
 
         return redirect(BASEPATH)
 

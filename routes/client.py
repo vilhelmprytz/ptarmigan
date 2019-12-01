@@ -43,26 +43,36 @@ def submit():
 
         for key, value in data.items():
             if key != "name" and key != "email" and key != "message":
-                return "at least one invalid key", 400
+                return redirect("/submit?fail=Invalid keys were sent.")
 
             if len(value) < 3:
-                return f"{key} is too short", 400
+                return redirect(f"/submit?fail={key} is too short.")
 
             if key == "name":
                 if len(value) > 50:
-                    return f"value {value} of key {key} is too long", 400
+                    return redirect(
+                        f"/submit?fail=Value {value} of key {key} is too long."
+                    )
 
             if key == "email":
                 if len(value) > 50:
-                    return f"value {value} of key {key} is too long", 400
+                    return redirect(
+                        f"/submit?fail=Value {value} of key {key} is too long."
+                    )
                 if "@" not in value:
-                    return f"value {value} of key {key} is missing @", 400
+                    return redirect(
+                        f"/submit?fail=Value {value} of key {key} is missing @."
+                    )
                 if "." not in value:
-                    return f"value {value} of key {key} is missing .", 400
+                    return redirect(
+                        f"/submit?fail=Value {value} of key {key} is missing ."
+                    )
 
             if key == "message":
                 if len(value) > 500:
-                    return f"value {value} of key {key} is too long", 400
+                    return redirect(
+                        f"/submit?fail=Value {value} of key {key} is too long."
+                    )
 
         # create objects
         try:
@@ -79,13 +89,13 @@ def submit():
             )  # sender_id=0 will always be client in conversation
             db.session.add(message)
         except Exception as err:
-            return f"error occured, {err}"
+            return redirect("/submit?fail=Internal server error occured.")
 
         # commit
         try:
             db.session.commit()
         except Exception as err:
-            return f"error occured, {err}"
+            return redirect("/submit?fail=Internal server error occured.")
 
         # trigger update
         ticket = Ticket.query.get(ticket.id)
@@ -113,25 +123,52 @@ def ticket():
     data = request.args
 
     if not data or len(data) < 2:
-        return "missing arguments", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Missing arguments."
+            ),
+            400,
+        )
 
     for key, value in data.items():
         if key != "id" and key != "key" and key != "success" and key != "fail":
-            return "at least one invalid variable", 400
+            return (
+                render_template(
+                    "errors/custom.html", title="400", message="Invalid keys were sent."
+                ),
+                400,
+            )
 
         if key == "id":
             if not is_integer(value):
-                return "id must be integer", 400
+                return (
+                    render_template(
+                        "errors/custom.html", title="400", message="Id must be integer."
+                    ),
+                    400,
+                )
 
         if key == "key":
             if len(value) != 15:
-                return "secret key is invalid length", 400
+                return (
+                    render_template(
+                        "errors/custom.html",
+                        title="400",
+                        message="Secret key is invalid length.",
+                    ),
+                    400,
+                )
 
     # check if secret_key is correct
     ticket = Ticket.query.get(data["id"])
 
     if ticket.client_key != data["key"]:
-        return "invalid secret key", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Secret key is invalid."
+            ),
+            400,
+        )
 
     messages = Message.query.filter_by(ticket_id=data["id"]).order_by(Message.id.desc())
 
@@ -160,32 +197,58 @@ def submitmessage():
     data = request.form
 
     if not data or len(data) < 3:
-        return "missing arguments", 400
+        return redirect(
+            f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Missing arguments."
+        )
 
     for key, value in data.items():
         if key != "message" and key != "ticket_id" and key != "client_key":
-            return "at least one invalid variable", 400
+            return redirect(
+                f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Invalid keys sent."
+            )
 
         if key == "ticket_id":
             if not is_integer(value):
-                return "id must be integer", 400
+                return (
+                    render_template(
+                        "errors/custom.html", title="400", message="id must be integer"
+                    ),
+                    400,
+                )
 
         if key == "message":
             if len(value) > 500:
-                return f"value {value} of key {key} is too long", 400
+                return redirect(
+                    f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Value {value} of key {key} is too long."
+                )
+
+            if len(value) < 3:
+                return redirect(
+                    f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Value {value} of key {key} is too short."
+                )
 
     # check if secret_key is correct
     ticket = Ticket.query.get(data["ticket_id"])
 
     if ticket.client_key != data["client_key"]:
-        return "invalid secret key", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Invalid secret key."
+            ),
+            400,
+        )
 
     try:
         message = Message(
             message=data["message"], sender_id=0, ticket_id=int(data["ticket_id"])
         )
     except Exception:
-        return "ticket id does not exist", 400
+        return (
+            render_template(
+                "errors/custom.html", title="400", message="Ticket does not exist."
+            ),
+            400,
+        )
 
     # update status
     ticket.status = 1
@@ -194,8 +257,13 @@ def submitmessage():
         db.session.add(message)
         db.session.commit()
     except Exception:
-        return "unable to create message", 400
+        return (
+            render_template(
+                "errors/custom.html", title="500", message="Unable to create message."
+            ),
+            500,
+        )
 
     return redirect(
-        f"/ticket?id={ticket.id}&key={ticket.client_key}&success=Meddelandet%20skickat!"
+        f"/ticket?id={ticket.id}&key={ticket.client_key}&success=Message sent!"
     )
