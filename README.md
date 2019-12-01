@@ -11,7 +11,7 @@ Read more about installation and requirements in the [documentation](https://pta
 
 ## Contributing
 
-Feel free to send a pull request or an issue. Ptarmigan uses the semantic versioning convention.
+Feel free to send a pull request or an issue.
 
 [documentation-badge]: https://readthedocs.org/projects/ptarmigan/badge/?version=latest
 [travis-badge]: https://travis-ci.org/VilhelmPrytz/ptarmigan.svg?branch=master

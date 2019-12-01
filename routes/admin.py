@@ -201,13 +201,13 @@ def admin_ticket_status():
     # validation check
     for key, value in data.items():
         if key != "ticket_id" and key != "status":
-            return redirect(
-                BASEPATH + f"/tickets/{ticket.id}?fail=Invalid keys were sent."
+            return render_template(
+                "errors/custom.html", title="400", message="Invalid keys were sent."
             )
 
         if not is_integer(value):
-            return redirect(
-                BASEPATH + f"/tickets/{ticket.id}?fail=Values have to be integers."
+            return render_template(
+                "errors/custom.html", title="400", message="Values have to be integers."
             )
 
     # get ticket
