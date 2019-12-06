@@ -21,7 +21,7 @@ def admin_login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # check if logged in
-        if session.get("admin_logged_in") != True:
+        if not session.get("admin_logged_in"):
             return redirect("/admin/login")
         return f(*args, **kwargs)
 

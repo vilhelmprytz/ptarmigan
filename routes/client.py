@@ -89,12 +89,16 @@ def submit():
             )  # sender_id=0 will always be client in conversation
             db.session.add(message)
         except Exception as err:
+            # `err` should be logged to logger when logger is implemented
+            print(str(err))
             return redirect("/submit?fail=Internal server error occured.")
 
         # commit
         try:
             db.session.commit()
         except Exception as err:
+            # `err` should be logged to logger when logger is implemented
+            print(str(err))
             return redirect("/submit?fail=Internal server error occured.")
 
         # trigger update

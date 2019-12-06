@@ -15,7 +15,9 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
-import hashlib, binascii, os
+import hashlib
+import binascii
+import os
 
 db = SQLAlchemy()
 

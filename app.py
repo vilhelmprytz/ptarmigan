@@ -17,6 +17,9 @@ from flask import Flask, render_template
 from datetime import timedelta
 from version import version
 
+from routes.client import client_routes
+from routes.admin import admin_routes
+
 from components.tools import read_configuration
 
 print(f"Running ptarmigan version {version}")
@@ -73,9 +76,6 @@ def error_500(e):
 
 
 # register routes
-from routes.client import client_routes
-from routes.admin import admin_routes
-
 app.register_blueprint(client_routes)
 app.register_blueprint(admin_routes)
 
