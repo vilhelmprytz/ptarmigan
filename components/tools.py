@@ -28,7 +28,7 @@ def random_string(length=10):
 
 def is_integer(string):
     try:
-        try_int = int(string)
+        int(string)
     except Exception:
         return False
 

@@ -13,10 +13,9 @@
 #                                                         #
 ###########################################################
 
-from flask import Flask, render_template, redirect
-from datetime import timedelta, datetime
+from flask import Flask, render_template
+from datetime import timedelta
 from version import version
-import string
 
 from components.tools import read_configuration
 
