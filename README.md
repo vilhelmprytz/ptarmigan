@@ -1,5 +1,5 @@
 # ptarmigan
-[![Build Status][travis-badge]](https://travis-ci.org/VilhelmPrytz/ptarmigan)
+[![Build Status][travis-badge]](https://travis-ci.com/VilhelmPrytz/ptarmigan)
 [![Requirements Status][requirement-badge]](https://requires.io/github/VilhelmPrytz/ptarmigan/requirements/?branch=master)
 [![Language grade: Python][lgtm-grade-badge]](https://lgtm.com/projects/g/VilhelmPrytz/ptarmigan/context:python)
 [![Total alerts][lgtm-alerts-badge]](https://lgtm.com/projects/g/VilhelmPrytz/ptarmigan/alerts/)
@@ -17,7 +17,7 @@ Read more about installation and requirements in the [documentation](https://pta
 
 Feel free to send a pull request or an issue.
 
-[travis-badge]: https://travis-ci.org/VilhelmPrytz/ptarmigan.svg?branch=master
+[travis-badge]: https://travis-ci.com/VilhelmPrytz/ptarmigan.svg?branch=master
 [requirement-badge]: https://requires.io/github/VilhelmPrytz/ptarmigan/requirements.svg?branch=master
 [lgtm-grade-badge]: https://img.shields.io/lgtm/grade/python/github/VilhelmPrytz/ptarmigan?logo=lgtm&logoWidth=18
 [lgtm-alerts-badge]: https://img.shields.io/lgtm/alerts/g/VilhelmPrytz/ptarmigan.svg?logo=lgtm&logoWidth=18
