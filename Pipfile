@@ -14,6 +14,7 @@ Flask-SQLAlchemy = "*"
 PyMySQL = "*"
 cryptography = "*"
 redis = "*"
+flask-minify = "*"
 
 [requires]
 python_version = "3.6"

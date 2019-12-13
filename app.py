@@ -14,6 +14,7 @@
 ###########################################################
 
 from flask import Flask, render_template
+from flask_minify import minify
 from datetime import timedelta
 import redis
 
@@ -31,6 +32,9 @@ from flask_session.__init__ import Session
 
 # flask app
 app = Flask(__name__)
+
+# minify
+minify(app=app)
 
 # read configuration
 config = read_configuration()

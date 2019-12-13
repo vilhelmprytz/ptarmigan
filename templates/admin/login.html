@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{{ name }} - Admin Login{% endblock %}
 {% block body %}
-    <div class="content">
+    <div class="content login-content">
+        <h1>{{ name }}</h1>
+        
         {% if fail %}
         <div class="alert alert-danger" role="alert">
             <p>{{ fail }}</p>

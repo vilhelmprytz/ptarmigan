@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ name }} - Admin Users{% endblock %}
+{% block body %}
+{% include "admin/navbar.html" %}
+    <div class="content">
+        <h1>Admin Users</h1>
+
+        {% if fail %}
+        <div class="alert alert-danger" role="alert">
+            <p>{{ fail }}</p>
+        </div>
+        {% endif %}
+    
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            <p>{{ success }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Created At</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for admin in admins %}
+            <tr>
+                <th scope="row">{{ admin.id }}</th>
+                <td>{{ admin.name }}</td>
+                <td>{{ admin.email }}</td>
+                <td>{{ admin.time_created }}</td>
+                <td>
+                    <a href="#">
+                        <button type="button" class="btn btn-primary">Edit</button>
+                    </a>
+
+                    <a href="#">
+                        <button type="button" class="btn btn-danger">Delete</button>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

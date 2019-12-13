@@ -399,3 +399,14 @@ def admin_logout():
     session.pop("admin_logged_in")
 
     return redirect(BASEPATH)
+
+
+@admin_routes.route(BASEPATH + "/users")
+@admin_login_required
+def users():
+    template = "admin/users.html"
+    admins = Admin.query.with_entities(
+        Admin.id, Admin.name, Admin.email, Admin.time_created
+    )
+
+    return render_template(template, name=config["settings"]["name"], admins=admins)

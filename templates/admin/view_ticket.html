@@ -15,13 +15,13 @@
             <p>Name: {{ ticket.name }}</p>
             <p>Email: {{ ticket.email }}</p>
             {% if ticket.status is eq(0) %}
-            <p>Open</p>
+            <p style="color: green">Open</p>
             {% elif ticket.status is eq(1) %}
-            <p>Customer-Reply</p>
+            <p style="color: darkorange">Customer-Reply</p>
             {% elif ticket.status is eq(2) %}
-            <p>Answered</p>
+            <p style="color: darkgray">Answered</p>
             {% elif ticket.status is eq(3) %}
-            <p>Closed</p>
+            <p style="color: red">Closed</p>
             {% else %}
             <p>Unknown status, {{ ticket.status }}</p>
             {% endif %}
