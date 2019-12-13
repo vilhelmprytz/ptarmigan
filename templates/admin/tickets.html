@@ -2,12 +2,14 @@
 {% block title %}{{ name }} - Admin View Ticket{% endblock %}
 {% block body %}
 {% include "admin/navbar.html" %}
-    <p>{{ view_msg }}</p>
+    <div class="content">
+        <p>{{ view_msg }}</p>
 
-    <a href="/admin/tickets"><button class="btn btn-primary">View Active Tickets</button></a>
-    <a href="/admin/tickets?status=2"><button class="btn btn-primary">View Answered Tickets</button></a>
-    <a href="/admin/tickets?status=3"><button class="btn btn-primary">View Closed Tickets</button></a>
+        <a href="/admin/tickets"><button class="btn btn-primary">View Active Tickets</button></a>
+        <a href="/admin/tickets?status=2"><button class="btn btn-primary">View Answered Tickets</button></a>
+        <a href="/admin/tickets?status=3"><button class="btn btn-primary">View Closed Tickets</button></a>
 
+    </div>
     <div class="list-group">
         {% for ticket in tickets %}
 
@@ -33,5 +35,5 @@
             <small class="text-muted">{{ ticket.email }}</small>
         </a>
         {% endfor %}
-    </table>
+    </div>
 {% endblock %}

@@ -2,24 +2,27 @@
 {% block title %}{{ name }} - System{% endblock %}
 {% block body %}
 {% include "admin/navbar.html" %}
-<h1>System</h1>
-{% if status %}
-{% if version is eq(new_release) %}
-<div class="alert alert-success" role="alert">
-    <p>You are running the latest version, <b>{{ version }}</b>.</p>
-</div>
-{% else %}
-<div class="alert alert-warning" role="alert">
-    <p>You are running <b>{{ version }}</b>, the latest version is <b>{{ new_release }}</b>.</p>
-</div>
-{% endif %}
-{% else %}
-<div class="alert alert-danger" role="alert">
-    <p>{{ new_release }}</p>
-</div>
-{% endif %}
-<h2>Update</h2>
-<div class="alert alert-warning" role="alert">
-    <p>This feature is not yet implemented.</p>
-</div>
+    <div class="content">
+        <h1>System</h1>
+
+        {% if status %}
+        {% if version is eq(new_release) %}
+        <div class="alert alert-success" role="alert">
+            <p>You are running the latest version, <b>{{ version }}</b>.</p>
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            <p>You are running <b>{{ version }}</b>, the latest version is <b>{{ new_release }}</b>.</p>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-danger" role="alert">
+            <p>{{ new_release }}</p>
+        </div>
+        {% endif %}
+        <h2>Update</h2>
+        <div class="alert alert-warning" role="alert">
+            <p>This feature is not yet implemented.</p>
+        </div>
+    </div>
 {% endblock %}

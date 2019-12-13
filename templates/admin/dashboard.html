@@ -2,8 +2,10 @@
 {% block title %}{{ name }} - Admin Dashboard{% endblock %}
 {% block body %}
 {% include "admin/navbar.html" %}
-<h1>Dashboard</h1>
-<div class="alert alert-primary" role="alert">
-    <p>Running ptarmigan version <b>{{ version }}</b>. This installation has <b>{{ num_messages }}</b> messages posted across <b>{{ num_tickets }}</b> tickets with <b>{{ num_admins }}</b> admin user(s)!</p>
-</div>
+    <div class="content">
+        <h1>Dashboard</h1>
+        <div class="alert alert-primary" role="alert">
+            <p>Running ptarmigan version <b>{{ version }}</b>. This installation has <b>{{ num_messages }}</b> messages posted across <b>{{ num_tickets }}</b> tickets with <b>{{ num_admins }}</b> admin user(s)!</p>
+        </div>
+    </div>
 {% endblock %}
