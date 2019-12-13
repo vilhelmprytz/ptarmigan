@@ -3,3 +3,6 @@ sessions
 
 # documentation
 docs/_build
+
+# IDE
+.vscode

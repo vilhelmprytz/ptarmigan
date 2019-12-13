@@ -6,6 +6,14 @@ This guide will cover the basics of installing ptarmigan.
 
 Ptarmigan uses MySQL as database. This guide will not cover on how to install MySQL. Once you have MySQL configured, create a database and an user account for ptarmigan.
 
+## Redis
+
+Ptarmigan uses Redis for session management. Redis can be installed using `apt`.
+
+```bash
+apt install -y redis
+```
+
 ## Cloning ptarmigan
 
 First we need to install Git and Python 3 (and vim, you can use other text editors such as nano if it suits you better).
@@ -53,14 +61,17 @@ The configuration should look something like this.
 ```
 {
     "settings": {
-        "name": "Ptarmigan",
-        "session_path": "sessions"
+        "name": "Ptarmigan"
     },
     "mysql": {
         "host": "127.0.0.1",
-        "username": "root",
-        "password": "",
+        "username": "ptarmigan",
+        "password": "password",
         "database": "ptarmigan"
+    },
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379
     },
     "mail": {
         "smtp_host": "",

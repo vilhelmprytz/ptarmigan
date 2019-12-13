@@ -1,13 +1,16 @@
 {
     "settings": {
-        "name": "Ptarmigan",
-        "session_path": "sessions"
+        "name": "Ptarmigan"
     },
     "mysql": {
         "host": "127.0.0.1",
         "username": "ptarmigan",
         "password": "password",
         "database": "ptarmigan"
+    },
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379
     },
     "mail": {
         "smtp_host": "",

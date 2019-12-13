@@ -15,6 +15,8 @@
 
 from flask import Flask, render_template
 from datetime import timedelta
+import redis
+
 from version import version
 
 from routes.client import client_routes
@@ -51,8 +53,8 @@ with app.app_context():
     db.create_all()
 
 # Session Management
-SESSION_TYPE = "filesystem"
-SESSION_FILE_DIR = config["settings"]["session_path"]
+SESSION_TYPE = "redis"
+SESSION_REDIS = redis.Redis(host=config["redis"]["host"], port=config["redis"]["port"])
 SESSION_PERMANENT = True
 PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
 
