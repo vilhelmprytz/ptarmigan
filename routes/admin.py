@@ -93,9 +93,11 @@ def tickets():
     )
 
 
-@admin_routes.route(BASEPATH + "/tickets/<id>")
+@admin_routes.route(BASEPATH + "/tickets/<id>", methods=["POST", "GET"])
 @admin_login_required
 def view_ticket(id):
+    template = "admin/view_ticket.html"
+
     if not is_integer(id):
         return (
             render_template(
@@ -125,156 +127,251 @@ def view_ticket(id):
     for admin in admins:
         admin_names[admin.id] = admin.name
 
-    return render_template(
-        "admin/view_ticket.html",
-        name=config["settings"]["name"],
-        ticket=ticket,
-        messages=messages,
-        admin_names=admin_names,
-        fail=request.args.get("fail"),
-        success=request.args.get("success"),
-    )
+    # view ticket to admin if GET request
+    if request.method == "GET":
+        return render_template(
+            template,
+            name=config["settings"]["name"],
+            ticket=ticket,
+            messages=messages,
+            admin_names=admin_names,
+        )
 
+    if request.method == "POST":
+        data = request.form
 
-@admin_routes.route(BASEPATH + "/submitmessage", methods=["POST"])
-@admin_login_required
-def admin_submit_message():
-    data = request.form
+        # admin is submitting a new message
+        if data["request_type"] == "new_message":
+            for key, value in data.items():
+                if key != "message" and key != "request_type" and len(data) != 2:
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            ticket=ticket,
+                            messages=messages,
+                            admin_names=admin_names,
+                            fail="Invalid keys were sent.",
+                        ),
+                        400,
+                    )
 
-    # validation check
-    for key, value in data.items():
-        if key != "message" and key != "ticket_id":
-            return redirect(
-                BASEPATH + f"/tickets/{data['ticket_id']}?fail=Invalid keys were sent."
-            )
+                if key == "message":
+                    if len(value) > 500:
+                        return (
+                            render_template(
+                                template,
+                                name=config["settings"]["name"],
+                                ticket=ticket,
+                                messages=messages,
+                                admin_names=admin_names,
+                                fail="Message too long.",
+                            ),
+                            400,
+                        )
 
-        if key == "ticket_id":
-            if not is_integer(value):
+                    if len(value) < 3:
+                        return (
+                            render_template(
+                                template,
+                                name=config["settings"]["name"],
+                                ticket=ticket,
+                                messages=messages,
+                                admin_names=admin_names,
+                                fail="Message too short.",
+                            ),
+                            400,
+                        )
+
+            # get ticket
+            ticket = Ticket.query.get(int(id))
+
+            try:
+                message = Message(
+                    message=data["message"],
+                    sender_id=int(session.get("admin_user_id")),
+                    ticket_id=int(id),
+                )
+            except Exception:
                 return (
                     render_template(
                         "errors/custom.html",
                         title="400",
-                        message="ticket_id has to be integer.",
+                        message="Ticket ID does not exist.",
                     ),
                     400,
                 )
 
-        if key == "message":
-            if len(value) > 500:
-                return redirect(
-                    BASEPATH + f"/tickets/{data['ticket_id']}?fail=Message too long."
+            # update status
+            ticket.status = 2
+
+            try:
+                db.session.add(message)
+                db.session.commit()
+            except Exception:
+                return (
+                    render_template(
+                        template,
+                        name=config["settings"]["name"],
+                        ticket=ticket,
+                        messages=messages,
+                        admin_names=admin_names,
+                        fail="Server error, could not create message.",
+                    ),
+                    500,
                 )
 
-            if len(value) < 3:
-                return redirect(
-                    BASEPATH + f"/tickets/{data['ticket_id']}?fail=Message too short."
+            # message created successfully
+            return render_template(
+                template,
+                name=config["settings"]["name"],
+                ticket=ticket,
+                messages=messages,
+                admin_names=admin_names,
+                success="Message sent!",
+            )
+
+        # admin is changing the status of the ticket
+        if data["request_type"] == "status_update":
+            for key, value in data.items():
+                if key != "request_type" and key != "status" and len(data) != 2:
+                    return render_template(
+                        "errors/custom.html",
+                        title="400",
+                        message="Invalid keys were sent.",
+                    )
+
+                if key == "status":
+                    if not is_integer(value):
+                        return render_template(
+                            "errors/custom.html",
+                            title="400",
+                            message="Value has to be integer.",
+                        )
+
+            # get ticket
+            try:
+                ticket = Ticket.query.get(int(id))
+            except Exception:
+                return (
+                    render_template(
+                        "errors/custom.html",
+                        title="400",
+                        message="Ticket ID does not exist.",
+                    ),
+                    400,
                 )
 
-    # get ticket
-    ticket = Ticket.query.get(int(data["ticket_id"]))
+            ticket.status = int(data["status"])
 
-    try:
-        message = Message(
-            message=data["message"],
-            sender_id=int(session.get("admin_user_id")),
-            ticket_id=int(data["ticket_id"]),
-        )
-    except Exception:
+            try:
+                db.session.commit()
+            except Exception:
+                return (
+                    render_template(
+                        "admin/view_ticket.html",
+                        name=config["settings"]["name"],
+                        ticket=ticket,
+                        messages=messages,
+                        admin_names=admin_names,
+                        fail="Unable to update status.",
+                    ),
+                    500,
+                )
+
+            # status updated successfully
+            return render_template(
+                "admin/view_ticket.html",
+                name=config["settings"]["name"],
+                ticket=ticket,
+                messages=messages,
+                admin_names=admin_names,
+                success="Status has been updated.",
+            )
+
+        # invalid request
         return (
             render_template(
-                "errors/custom.html", title="400", message="Ticket ID does not exist."
+                template,
+                name=config["settings"]["name"],
+                ticket=ticket,
+                messages=messages,
+                admin_names=admin_names,
+                fail="Invalid request type",
             ),
             400,
         )
-
-    # update status
-    ticket.status = 2
-
-    try:
-        db.session.add(message)
-        db.session.commit()
-    except Exception:
-        return redirect(
-            BASEPATH
-            + f"/tickets/{data['ticket_id']}?fail=Server error, could not create message."
-        )
-
-    return redirect(BASEPATH + f'/tickets/{data["ticket_id"]}?success=Message sent!')
-
-
-@admin_routes.route(BASEPATH + "/ticket_status", methods=["POST"])
-@admin_login_required
-def admin_ticket_status():
-    data = request.form
-
-    # validation check
-    for key, value in data.items():
-        if key != "ticket_id" and key != "status":
-            return render_template(
-                "errors/custom.html", title="400", message="Invalid keys were sent."
-            )
-
-        if not is_integer(value):
-            return render_template(
-                "errors/custom.html", title="400", message="Values have to be integers."
-            )
-
-    # get ticket
-    try:
-        ticket = Ticket.query.get(int(data["ticket_id"]))
-    except Exception:
-        return (
-            render_template(
-                "errors/custom.html", title="400", message="Ticket ID does not exist."
-            ),
-            400,
-        )
-
-    ticket.status = int(data["status"])
-
-    try:
-        db.session.commit()
-    except Exception:
-        return redirect(
-            BASEPATH + f"/tickets/{ticket.id}?fail=Unable to update status."
-        )
-
-    return redirect(BASEPATH + f"/tickets/{ticket.id}?success=Status has been updated.")
 
 
 @admin_routes.route(BASEPATH + "/login", methods=["POST", "GET"])
 def admin_login():
+    template = "admin/login.html"
+
     if request.method == "POST":
         data = request.form
 
         # validation check
         for key, value in data.items():
             if key != "email" and key != "password":
-                return redirect(BASEPATH + "/login?fail=Invalid keys were sent.")
+                return (
+                    render_template(
+                        template,
+                        name=config["settings"]["name"],
+                        fail="Invalid keys were sent.",
+                    ),
+                    400,
+                )
 
             if len(value) < 3:
-                return redirect(BASEPATH + f"/login?fail={key} is too short.")
+                return (
+                    render_template(
+                        template,
+                        name=config["settings"]["name"],
+                        fail=f"{key} is too short.",
+                    ),
+                    400,
+                )
 
             if key == "email":
                 if len(value) > 50:
-                    return redirect(
-                        BASEPATH + f"/login?fail=Value {value} of key {key} is too long"
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            fail=f"{key} is too long.",
+                        ),
+                        400,
                     )
                 if "@" not in value:
-                    return redirect(
-                        BASEPATH
-                        + f"/login?fail=Value {value} of key {key} is missing @"
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            fail=f"Email is missing '@'.",
+                        ),
+                        400,
                     )
                 if "." not in value:
-                    return redirect(
-                        BASEPATH
-                        + f"/login?fail=Value {value} of key {key} is missing ."
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            fail=f"Email is missing '.'",
+                        ),
+                        400,
                     )
 
         # check authentication
-        admin = Admin.query.filter_by(email=data["email"])[
-            0
-        ]  # should always only be one admin with this email
+        try:
+            admin = Admin.query.filter_by(email=data["email"])[
+                0
+            ]  # should always only be one admin with this email
+        except Exception:
+            return render_template(
+                template,
+                name=config["settings"]["name"],
+                fail="Account does not exist or wrong password.",
+            )
 
         # verify
         if Admin.verify_password(Admin, admin.hashed_password, data["password"]):
@@ -282,17 +379,19 @@ def admin_login():
             session["admin_user_id"] = admin.id
         else:
             session["admin_logged_in"] = False
-            return redirect(BASEPATH + "/login?fail=Wrong password.")
+            return (
+                render_template(
+                    template,
+                    name=config["settings"]["name"],
+                    fail="Account does not exist or wrong password.",
+                ),
+                400,
+            )
 
         return redirect(BASEPATH)
 
     elif request.method == "GET":
-        return render_template(
-            "admin/login.html",
-            name=config["settings"]["name"],
-            fail=request.args.get("fail"),
-            success=request.args.get("success"),
-        )
+        return render_template(template, name=config["settings"]["name"],)
 
 
 @admin_routes.route(BASEPATH + "/logout")

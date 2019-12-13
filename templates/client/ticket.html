@@ -40,14 +40,14 @@
     {% endif %}
 
     <div class="reply-form">
-        <form action="/submitmessage" method="post">
+        <form action="/ticket?id={{ ticket.id }}&key={{ ticket.client_key }}" method="post">
             <div class="form-group">
                 <label for="message">Message</label>
                 <textarea name="message" class="form-control" id="message" rows="3"></textarea>
             </div>
 
-            <input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
-            <input type="hidden" name="client_key" value="{{ ticket.client_key }}" />
+            <!--<input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
+            <input type="hidden" name="client_key" value="{{ ticket.client_key }}" />-->
 
             <button type="submit" class="btn btn-primary">Send</button>
         </form>

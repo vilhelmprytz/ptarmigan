@@ -17,19 +17,19 @@
     <form action="/submit" method="post">
         <div class="form-group">
             <label for="name">Name</label>
-            <input name="name" type="text" class="form-control" id="name" aria-describedby="nameHelp" placeholder="Enter your name">
+            <input {% if prefill_values %}value="{{prefill_values.name}}"{% endif %} name="name" type="text" class="form-control" id="name" aria-describedby="nameHelp" placeholder="Enter your name">
             <small id="nameHelp" class="form-text text-muted">Enter your full name.</small>
         </div>
 
         <div class="form-group">
             <label for="email">Email</label>
-            <input name="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+            <input {% if prefill_values %}value="{{prefill_values.email}}"{% endif %} name="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
             <small id="emailHelp" class="form-text text-muted">Enter a valid email address, ticket updates will be sent to this address.</small>
         </div>
 
         <div class="form-group">
             <label for="message">Message</label>
-            <textarea name="message" class="form-control" id="message" rows="3"></textarea>
+            <textarea name="message" class="form-control" id="message" rows="3">{% if prefill_values %}{{prefill_values.message}}{% endif %}</textarea>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>

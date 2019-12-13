@@ -38,40 +38,113 @@ def index():
 
 @client_routes.route("/submit", methods=["POST", "GET"])
 def submit():
+    template = "client/submit.html"
+
     if request.method == "POST":
         data = request.form
 
         for key, value in data.items():
-            if key != "name" and key != "email" and key != "message":
-                return redirect("/submit?fail=Invalid keys were sent.")
+            if key != "name" and key != "email" and key != "message" and len(data) != 3:
+                return (
+                    render_template(
+                        template,
+                        name=config["settings"]["name"],
+                        admin_status=session.get("admin_logged_in"),
+                        fail="Invalid keys were sent.",
+                    ),
+                    400,
+                )
 
             if len(value) < 3:
-                return redirect(f"/submit?fail={key} is too short.")
+                return (
+                    render_template(
+                        template,
+                        name=config["settings"]["name"],
+                        admin_status=session.get("admin_logged_in"),
+                        fail=f"Value of {key} is too short.",
+                        prefill_values={
+                            "name": data["name"],
+                            "email": data["email"],
+                            "message": data["message"],
+                        },
+                    ),
+                    400,
+                )
 
             if key == "name":
                 if len(value) > 50:
-                    return redirect(
-                        f"/submit?fail=Value {value} of key {key} is too long."
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            fail=f"Name can max be 50 characters long.",
+                            prefill_values={
+                                "name": data["name"],
+                                "email": data["email"],
+                                "message": data["message"],
+                            },
+                        ),
+                        400,
                     )
 
             if key == "email":
                 if len(value) > 50:
-                    return redirect(
-                        f"/submit?fail=Value {value} of key {key} is too long."
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            fail=f"Email can max be 50 characters long.",
+                            prefill_values={
+                                "name": data["name"],
+                                "email": data["email"],
+                                "message": data["message"],
+                            },
+                        ),
+                        400,
                     )
                 if "@" not in value:
-                    return redirect(
-                        f"/submit?fail=Value {value} of key {key} is missing @."
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            fail=f"Missing '@' in email.",
+                        ),
+                        400,
                     )
                 if "." not in value:
-                    return redirect(
-                        f"/submit?fail=Value {value} of key {key} is missing ."
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            fail=f"Email doesn't appear to be a valid email address.",
+                            prefill_values={
+                                "name": data["name"],
+                                "email": data["email"],
+                                "message": data["message"],
+                            },
+                        ),
+                        400,
                     )
 
             if key == "message":
                 if len(value) > 500:
-                    return redirect(
-                        f"/submit?fail=Value {value} of key {key} is too long."
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            fail=f"Message can max be 500 characters long.",
+                            prefill_values={
+                                "name": data["name"],
+                                "email": data["email"],
+                                "message": data["message"],
+                            },
+                        ),
+                        400,
                     )
 
         # create objects
@@ -91,7 +164,20 @@ def submit():
         except Exception as err:
             # `err` should be logged to logger when logger is implemented
             print(str(err))
-            return redirect("/submit?fail=Internal server error occured.")
+            return (
+                render_template(
+                    template,
+                    name=config["settings"]["name"],
+                    admin_status=session.get("admin_logged_in"),
+                    fail=f"Internal server error occured.",
+                    prefill_values={
+                        "name": data["name"],
+                        "email": data["email"],
+                        "message": data["message"],
+                    },
+                ),
+                500,
+            )
 
         # commit
         try:
@@ -99,7 +185,20 @@ def submit():
         except Exception as err:
             # `err` should be logged to logger when logger is implemented
             print(str(err))
-            return redirect("/submit?fail=Internal server error occured.")
+            return (
+                render_template(
+                    template,
+                    name=config["settings"]["name"],
+                    admin_status=session.get("admin_logged_in"),
+                    fail=f"Internal server error occured.",
+                    prefill_values={
+                        "name": data["name"],
+                        "email": data["email"],
+                        "message": data["message"],
+                    },
+                ),
+                500,
+            )
 
         # trigger update
         ticket = Ticket.query.get(ticket.id)
@@ -110,23 +209,24 @@ def submit():
         ticket.status = 0
         db.session.commit()
 
+        # success
         return redirect(f"/ticket?id={ticket.id}&key={ticket.client_key}")
 
     if request.method == "GET":
         return render_template(
-            "client/submit.html",
+            template,
             name=config["settings"]["name"],
             admin_status=session.get("admin_logged_in"),
-            fail=request.args.get("fail"),
-            success=request.args.get("success"),
         )
 
 
-@client_routes.route("/ticket")
+@client_routes.route("/ticket", methods=["POST", "GET"])
 def ticket():
-    data = request.args
+    template = "client/ticket.html"
+    url_data = request.args
+    data = request.form
 
-    if not data or len(data) < 2:
+    if not url_data or len(url_data) < 2:
         return (
             render_template(
                 "errors/custom.html", title="400", message="Missing arguments."
@@ -134,7 +234,7 @@ def ticket():
             400,
         )
 
-    for key, value in data.items():
+    for key, value in url_data.items():
         if key != "id" and key != "key" and key != "success" and key != "fail":
             return (
                 render_template(
@@ -164,9 +264,9 @@ def ticket():
                 )
 
     # check if secret_key is correct
-    ticket = Ticket.query.get(data["id"])
+    ticket = Ticket.query.get(url_data["id"])
 
-    if ticket.client_key != data["key"]:
+    if ticket.client_key != url_data["key"]:
         return (
             render_template(
                 "errors/custom.html", title="400", message="Secret key is invalid."
@@ -174,7 +274,9 @@ def ticket():
             400,
         )
 
-    messages = Message.query.filter_by(ticket_id=data["id"]).order_by(Message.id.desc())
+    messages = Message.query.filter_by(ticket_id=url_data["id"]).order_by(
+        Message.id.desc()
+    )
 
     # build dict with admins
     admins = Admin.query.all()
@@ -184,90 +286,121 @@ def ticket():
     for admin in admins:
         admin_names[admin.id] = admin.name
 
-    return render_template(
-        "client/ticket.html",
-        name=config["settings"]["name"],
-        admin_status=session.get("admin_logged_in"),
-        ticket=ticket,
-        messages=messages,
-        admin_names=admin_names,
-        fail=request.args.get("fail"),
-        success=request.args.get("success"),
-    )
-
-
-@client_routes.route("/submitmessage", methods=["POST"])
-def submitmessage():
-    data = request.form
-
-    if not data or len(data) < 3:
-        return redirect(
-            f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Missing arguments."
+    # if user is trying to view ticket
+    if request.method == "GET":
+        return render_template(
+            template,
+            name=config["settings"]["name"],
+            admin_status=session.get("admin_logged_in"),
+            ticket=ticket,
+            messages=messages,
+            admin_names=admin_names,
         )
 
-    for key, value in data.items():
-        if key != "message" and key != "ticket_id" and key != "client_key":
-            return redirect(
-                f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Invalid keys sent."
+    # if user is trying to submit a new message
+    if request.method == "POST":
+        if not data or len(data) != 1:
+            return (
+                render_template(
+                    template,
+                    name=config["settings"]["name"],
+                    admin_status=session.get("admin_logged_in"),
+                    ticket=ticket,
+                    messages=messages,
+                    admin_names=admin_names,
+                    fail="Missing arguments/invalid arguments.",
+                ),
+                400,
             )
 
-        if key == "ticket_id":
-            if not is_integer(value):
+        for key, value in data.items():
+            if key != "message":
                 return (
                     render_template(
-                        "errors/custom.html", title="400", message="id must be integer"
+                        template,
+                        name=config["settings"]["name"],
+                        admin_status=session.get("admin_logged_in"),
+                        ticket=ticket,
+                        messages=messages,
+                        admin_names=admin_names,
+                        fail="Invalid data sent.",
                     ),
                     400,
                 )
 
-        if key == "message":
-            if len(value) > 500:
-                return redirect(
-                    f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Value {value} of key {key} is too long."
-                )
+            if key == "message":
+                if len(value) > 500:
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            ticket=ticket,
+                            messages=messages,
+                            admin_names=admin_names,
+                            fail="Message is too long, maximum is 500 characters.",
+                        ),
+                        400,
+                    )
 
-            if len(value) < 3:
-                return redirect(
-                    f"/ticket?id={data['ticket_id']}&key={data['client_key']}&fail=Value {value} of key {key} is too short."
-                )
+                if len(value) < 3:
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            ticket=ticket,
+                            messages=messages,
+                            admin_names=admin_names,
+                            fail="Message is too short, minimum is 3 characters.",
+                        ),
+                        400,
+                    )
 
-    # check if secret_key is correct
-    ticket = Ticket.query.get(data["ticket_id"])
+        # get ticket info
+        try:
+            message = Message(
+                message=data["message"], sender_id=0, ticket_id=int(url_data["id"])
+            )
+        except Exception:
+            return (
+                render_template(
+                    "errors/custom.html", title="400", message="Ticket does not exist."
+                ),
+                400,
+            )
 
-    if ticket.client_key != data["client_key"]:
+        # update status
+        ticket.status = 1
+
+        # create message
+        try:
+            db.session.add(message)
+            db.session.commit()
+        except Exception:
+            return (
+                render_template(
+                    template,
+                    name=config["settings"]["name"],
+                    admin_status=session.get("admin_logged_in"),
+                    ticket=ticket,
+                    messages=messages,
+                    admin_names=admin_names,
+                    fail="Internal server error occured while creating message.",
+                ),
+                500,
+            )
+
+        # successfully created message
         return (
             render_template(
-                "errors/custom.html", title="400", message="Invalid secret key."
-            ),
-            400,
-        )
-
-    try:
-        message = Message(
-            message=data["message"], sender_id=0, ticket_id=int(data["ticket_id"])
-        )
-    except Exception:
-        return (
-            render_template(
-                "errors/custom.html", title="400", message="Ticket does not exist."
-            ),
-            400,
-        )
-
-    # update status
-    ticket.status = 1
-
-    try:
-        db.session.add(message)
-        db.session.commit()
-    except Exception:
-        return (
-            render_template(
-                "errors/custom.html", title="500", message="Unable to create message."
+                template,
+                name=config["settings"]["name"],
+                admin_status=session.get("admin_logged_in"),
+                ticket=ticket,
+                messages=messages,
+                admin_names=admin_names,
+                success="Message has been sent!",
             ),
             500,
         )
-
-    return redirect(
-        f"/ticket?id={ticket.id}&key={ticket.client_key}&success=Message sent!"
-    )

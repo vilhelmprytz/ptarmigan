@@ -41,8 +41,8 @@
     {% endif %}
 
     <div class="status-form">
-        <form action="/admin/ticket_status" method="post">
-            <input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
+        <form action="/admin/tickets/{{ ticket.id }}" method="post">
+            <input type="hidden" name="request_type" value="status_update" />
             <input type="hidden" name="status" value="3" />
 
             <button type="submit" class="btn btn-primary">Close</button>
@@ -50,13 +50,13 @@
     </div>
 
     <div class="reply-form">
-        <form action="/admin/submitmessage" method="post">
+        <form action="/admin/tickets/{{ ticket.id }}" method="post">
             <div class="form-group">
                 <label for="message">Message</label>
                 <textarea name="message" class="form-control" id="message" rows="3"></textarea>
             </div>
 
-            <input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
+            <input type="hidden" name="request_type" value="new_message" />
 
             <button type="submit" class="btn btn-primary">Send</button>
         </form>
