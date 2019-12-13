@@ -18,7 +18,12 @@ from flask import Blueprint, render_template, request, redirect, session
 from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
-from components.tools import is_integer, random_string, read_configuration
+from components.tools import (
+    is_integer,
+    random_string,
+    read_configuration,
+    is_valid_input,
+)
 
 # blueprint init
 client_routes = Blueprint("client_routes", __name__, template_folder="../templates")
@@ -129,6 +134,23 @@ def submit():
                         ),
                         400,
                     )
+                if not is_valid_input(
+                    value, allow_space=False, swedish=False, allow_newline=False
+                ):
+                    return (
+                        render_template(
+                            template,
+                            name=config["settings"]["name"],
+                            admin_status=session.get("admin_logged_in"),
+                            fail=f"Email contains illegal characters (no space allowed).",
+                            prefill_values={
+                                "name": data["name"],
+                                "email": data["email"],
+                                "message": data["message"],
+                            },
+                        ),
+                        400,
+                    )
 
             if key == "message":
                 if len(value) > 500:
@@ -146,6 +168,23 @@ def submit():
                         ),
                         400,
                     )
+
+            # check if valid
+            if not is_valid_input(key) or not is_valid_input(value):
+                return (
+                    render_template(
+                        template,
+                        name=config["settings"]["name"],
+                        admin_status=session.get("admin_logged_in"),
+                        fail=f"Data contains illegal characters.",
+                        prefill_values={
+                            "name": data["name"],
+                            "email": data["email"],
+                            "message": data["message"],
+                        },
+                    ),
+                    400,
+                )
 
         # create objects
         try:

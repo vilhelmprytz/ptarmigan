@@ -42,3 +42,27 @@ def read_configuration():
         config = json.load(f)
 
     return config
+
+
+def is_valid_input(variable, allow_space=True, swedish=True, allow_newline=True):
+    """Returns boolean whether variable is valid input or not"""
+
+    ILLEGAL_CHARACTERS = ["<", ">", ";"]
+    ALLOWED_CHARACTERS = list(string.printable)
+
+    if not allow_space:
+        ALLOWED_CHARACTERS.remove(" ")
+
+    if not allow_newline:
+        ALLOWED_CHARACTERS.remove("\n")
+
+    if swedish:
+        ALLOWED_CHARACTERS.extend(["å", "ä", "ö", "Å", "Ä", "Ö"])
+
+    if any(x in variable for x in ILLEGAL_CHARACTERS):
+        return False
+
+    if any(x not in ALLOWED_CHARACTERS for x in variable):
+        return False
+
+    return True

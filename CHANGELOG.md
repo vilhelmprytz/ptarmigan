@@ -1,2 +1,5 @@
-# v0.0.1 (active development)
+# Changelog
+
+## v0.1.0 (under active development)
+
 * Inital release
