@@ -19,7 +19,7 @@ from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
 from components.decorators import admin_login_required
-from components.tools import is_integer
+from components.core import is_integer
 from components.update import check_for_new_releases
 from sqlalchemy import or_
 

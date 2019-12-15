@@ -5,6 +5,7 @@
 [![Total alerts][lgtm-alerts-badge]](https://lgtm.com/projects/g/VilhelmPrytz/ptarmigan/alerts/)
 [![Code style: black][codestyle-badge]](https://github.com/psf/black)
 [![Documentation Status][documentation-badge]](https://ptarmigan.readthedocs.io/en/latest/?badge=latest)
+[![Total lines][lines-badge]](https://github.com/VilhelmPrytz/ptarmigan)
 [![MIT License][license-badge]](LICENSE)
 
 Support ticket management system built in Python 3 and Flask.
@@ -23,4 +24,5 @@ Feel free to send a pull request or an issue.
 [lgtm-alerts-badge]: https://img.shields.io/lgtm/alerts/g/VilhelmPrytz/ptarmigan.svg?logo=lgtm&logoWidth=18
 [codestyle-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
 [documentation-badge]: https://readthedocs.org/projects/ptarmigan/badge/?version=latest
+[lines-badge]: https://tokei.rs/b1/github/VilhelmPrytz/ptarmigan
 [license-badge]: https://img.shields.io/badge/license-MIT-green

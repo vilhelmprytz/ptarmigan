@@ -18,7 +18,7 @@ from flask import Blueprint, render_template, request, redirect, session
 from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
-from components.tools import (
+from components.core import (
     is_integer,
     random_string,
     is_valid_input,

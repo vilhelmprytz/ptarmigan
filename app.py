@@ -23,7 +23,7 @@ from version import version
 from routes.client import client_routes
 from routes.admin import admin_routes
 
-from components.tools import read_configuration
+from components.core import read_configuration
 
 print(f"Running ptarmigan version {version}")
 
