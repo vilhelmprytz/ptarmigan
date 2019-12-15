@@ -65,6 +65,12 @@ PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
 app.config.from_object(__name__)
 Session(app)
 
+# variables available across all templates
+@app.context_processor
+def inject_version():
+    return dict(version=version, name=config["settings"]["name"])
+
+
 # error handler
 @app.errorhandler(400)
 def error_400(e):

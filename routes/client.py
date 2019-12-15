@@ -21,7 +21,6 @@ from components.models import db, Admin, Message, Ticket
 from components.tools import (
     is_integer,
     random_string,
-    read_configuration,
     is_valid_input,
 )
 
@@ -29,15 +28,12 @@ from components.tools import (
 client_routes = Blueprint("client_routes", __name__, template_folder="../templates")
 
 # blueprint global variables
-config = read_configuration()
 
 # routes
 @client_routes.route("/")
 def index():
     return render_template(
-        "client/index.html",
-        name=config["settings"]["name"],
-        admin_status=session.get("admin_logged_in"),
+        "client/index.html", admin_status=session.get("admin_logged_in"),
     )
 
 
@@ -53,7 +49,6 @@ def submit():
                 return (
                     render_template(
                         template,
-                        name=config["settings"]["name"],
                         admin_status=session.get("admin_logged_in"),
                         fail="Invalid keys were sent.",
                     ),
@@ -64,7 +59,6 @@ def submit():
                 return (
                     render_template(
                         template,
-                        name=config["settings"]["name"],
                         admin_status=session.get("admin_logged_in"),
                         fail=f"Value of {key} is too short.",
                         prefill_values={
@@ -81,7 +75,6 @@ def submit():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             fail=f"Name can max be 50 characters long.",
                             prefill_values={
@@ -98,7 +91,6 @@ def submit():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             fail=f"Email can max be 50 characters long.",
                             prefill_values={
@@ -113,7 +105,6 @@ def submit():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             fail=f"Missing '@' in email.",
                         ),
@@ -123,7 +114,6 @@ def submit():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             fail=f"Email doesn't appear to be a valid email address.",
                             prefill_values={
@@ -140,7 +130,6 @@ def submit():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             fail=f"Email contains illegal characters (no space allowed).",
                             prefill_values={
@@ -157,7 +146,6 @@ def submit():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             fail=f"Message can max be 500 characters long.",
                             prefill_values={
@@ -174,7 +162,6 @@ def submit():
                 return (
                     render_template(
                         template,
-                        name=config["settings"]["name"],
                         admin_status=session.get("admin_logged_in"),
                         fail=f"Data contains illegal characters.",
                         prefill_values={
@@ -206,7 +193,6 @@ def submit():
             return (
                 render_template(
                     template,
-                    name=config["settings"]["name"],
                     admin_status=session.get("admin_logged_in"),
                     fail=f"Internal server error occured.",
                     prefill_values={
@@ -227,7 +213,6 @@ def submit():
             return (
                 render_template(
                     template,
-                    name=config["settings"]["name"],
                     admin_status=session.get("admin_logged_in"),
                     fail=f"Internal server error occured.",
                     prefill_values={
@@ -252,11 +237,7 @@ def submit():
         return redirect(f"/ticket?id={ticket.id}&key={ticket.client_key}")
 
     if request.method == "GET":
-        return render_template(
-            template,
-            name=config["settings"]["name"],
-            admin_status=session.get("admin_logged_in"),
-        )
+        return render_template(template, admin_status=session.get("admin_logged_in"),)
 
 
 @client_routes.route("/ticket", methods=["POST", "GET"])
@@ -329,7 +310,6 @@ def ticket():
     if request.method == "GET":
         return render_template(
             template,
-            name=config["settings"]["name"],
             admin_status=session.get("admin_logged_in"),
             ticket=ticket,
             messages=messages,
@@ -342,7 +322,6 @@ def ticket():
             return (
                 render_template(
                     template,
-                    name=config["settings"]["name"],
                     admin_status=session.get("admin_logged_in"),
                     ticket=ticket,
                     messages=messages,
@@ -357,7 +336,6 @@ def ticket():
                 return (
                     render_template(
                         template,
-                        name=config["settings"]["name"],
                         admin_status=session.get("admin_logged_in"),
                         ticket=ticket,
                         messages=messages,
@@ -372,7 +350,6 @@ def ticket():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             ticket=ticket,
                             messages=messages,
@@ -386,7 +363,6 @@ def ticket():
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             admin_status=session.get("admin_logged_in"),
                             ticket=ticket,
                             messages=messages,
@@ -420,7 +396,6 @@ def ticket():
             return (
                 render_template(
                     template,
-                    name=config["settings"]["name"],
                     admin_status=session.get("admin_logged_in"),
                     ticket=ticket,
                     messages=messages,
@@ -434,7 +409,6 @@ def ticket():
         return (
             render_template(
                 template,
-                name=config["settings"]["name"],
                 admin_status=session.get("admin_logged_in"),
                 ticket=ticket,
                 messages=messages,

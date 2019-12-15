@@ -19,17 +19,15 @@ from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
 from components.decorators import admin_login_required
-from components.tools import is_integer, read_configuration
+from components.tools import is_integer
 from components.update import check_for_new_releases
 from sqlalchemy import or_
-from version import version
 
 # blueprint init
 admin_routes = Blueprint("admin_routes", __name__, template_folder="../templates")
 
 # blueprint global variables
 BASEPATH = "/admin"
-config = read_configuration()
 
 # routes
 @admin_routes.route(BASEPATH)
@@ -41,11 +39,9 @@ def index():
 
     return render_template(
         "admin/dashboard.html",
-        name=config["settings"]["name"],
         num_tickets=len(tickets),
         num_messages=len(messages),
         num_admins=len(admins),
-        version=version,
     )
 
 
@@ -54,13 +50,7 @@ def index():
 def system():
     status, new_release = check_for_new_releases()
 
-    return render_template(
-        "admin/system.html",
-        name=config["settings"]["name"],
-        status=status,
-        new_release=new_release,
-        version=version,
-    )
+    return render_template("admin/system.html", status=status, new_release=new_release,)
 
 
 @admin_routes.route(BASEPATH + "/tickets")
@@ -85,12 +75,7 @@ def tickets():
         ).order_by(Ticket.time_updated.asc())
         view_msg = "Viewing active tickets"
 
-    return render_template(
-        "admin/tickets.html",
-        name=config["settings"]["name"],
-        tickets=tickets,
-        view_msg=view_msg,
-    )
+    return render_template("admin/tickets.html", tickets=tickets, view_msg=view_msg,)
 
 
 @admin_routes.route(BASEPATH + "/tickets/<id>", methods=["POST", "GET"])
@@ -130,11 +115,7 @@ def view_ticket(id):
     # view ticket to admin if GET request
     if request.method == "GET":
         return render_template(
-            template,
-            name=config["settings"]["name"],
-            ticket=ticket,
-            messages=messages,
-            admin_names=admin_names,
+            template, ticket=ticket, messages=messages, admin_names=admin_names,
         )
 
     if request.method == "POST":
@@ -147,7 +128,6 @@ def view_ticket(id):
                     return (
                         render_template(
                             template,
-                            name=config["settings"]["name"],
                             ticket=ticket,
                             messages=messages,
                             admin_names=admin_names,
@@ -161,7 +141,6 @@ def view_ticket(id):
                         return (
                             render_template(
                                 template,
-                                name=config["settings"]["name"],
                                 ticket=ticket,
                                 messages=messages,
                                 admin_names=admin_names,
@@ -174,7 +153,6 @@ def view_ticket(id):
                         return (
                             render_template(
                                 template,
-                                name=config["settings"]["name"],
                                 ticket=ticket,
                                 messages=messages,
                                 admin_names=admin_names,
@@ -212,7 +190,6 @@ def view_ticket(id):
                 return (
                     render_template(
                         template,
-                        name=config["settings"]["name"],
                         ticket=ticket,
                         messages=messages,
                         admin_names=admin_names,
@@ -224,7 +201,6 @@ def view_ticket(id):
             # message created successfully
             return render_template(
                 template,
-                name=config["settings"]["name"],
                 ticket=ticket,
                 messages=messages,
                 admin_names=admin_names,
@@ -270,7 +246,6 @@ def view_ticket(id):
                 return (
                     render_template(
                         "admin/view_ticket.html",
-                        name=config["settings"]["name"],
                         ticket=ticket,
                         messages=messages,
                         admin_names=admin_names,
@@ -282,7 +257,6 @@ def view_ticket(id):
             # status updated successfully
             return render_template(
                 "admin/view_ticket.html",
-                name=config["settings"]["name"],
                 ticket=ticket,
                 messages=messages,
                 admin_names=admin_names,
@@ -293,7 +267,6 @@ def view_ticket(id):
         return (
             render_template(
                 template,
-                name=config["settings"]["name"],
                 ticket=ticket,
                 messages=messages,
                 admin_names=admin_names,
@@ -314,50 +287,30 @@ def admin_login():
         for key, value in data.items():
             if key != "email" and key != "password":
                 return (
-                    render_template(
-                        template,
-                        name=config["settings"]["name"],
-                        fail="Invalid keys were sent.",
-                    ),
+                    render_template(template, fail="Invalid keys were sent.",),
                     400,
                 )
 
             if len(value) < 3:
                 return (
-                    render_template(
-                        template,
-                        name=config["settings"]["name"],
-                        fail=f"{key} is too short.",
-                    ),
+                    render_template(template, fail=f"{key} is too short.",),
                     400,
                 )
 
             if key == "email":
                 if len(value) > 50:
                     return (
-                        render_template(
-                            template,
-                            name=config["settings"]["name"],
-                            fail=f"{key} is too long.",
-                        ),
+                        render_template(template, fail=f"{key} is too long.",),
                         400,
                     )
                 if "@" not in value:
                     return (
-                        render_template(
-                            template,
-                            name=config["settings"]["name"],
-                            fail=f"Email is missing '@'.",
-                        ),
+                        render_template(template, fail=f"Email is missing '@'.",),
                         400,
                     )
                 if "." not in value:
                     return (
-                        render_template(
-                            template,
-                            name=config["settings"]["name"],
-                            fail=f"Email is missing '.'",
-                        ),
+                        render_template(template, fail=f"Email is missing '.'",),
                         400,
                     )
 
@@ -368,9 +321,7 @@ def admin_login():
             ]  # should always only be one admin with this email
         except Exception:
             return render_template(
-                template,
-                name=config["settings"]["name"],
-                fail="Account does not exist or wrong password.",
+                template, fail="Account does not exist or wrong password.",
             )
 
         # verify
@@ -381,9 +332,7 @@ def admin_login():
             session["admin_logged_in"] = False
             return (
                 render_template(
-                    template,
-                    name=config["settings"]["name"],
-                    fail="Account does not exist or wrong password.",
+                    template, fail="Account does not exist or wrong password.",
                 ),
                 400,
             )
@@ -391,7 +340,7 @@ def admin_login():
         return redirect(BASEPATH)
 
     elif request.method == "GET":
-        return render_template(template, name=config["settings"]["name"],)
+        return render_template(template)
 
 
 @admin_routes.route(BASEPATH + "/logout")
@@ -409,4 +358,4 @@ def users():
         Admin.id, Admin.name, Admin.email, Admin.time_created
     )
 
-    return render_template(template, name=config["settings"]["name"], admins=admins)
+    return render_template(template, admins=admins)
