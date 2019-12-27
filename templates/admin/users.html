@@ -36,13 +36,14 @@
                 <td>{{ admin.email }}</td>
                 <td>{{ admin.time_created }}</td>
                 <td>
-                    <a href="#">
+                    <a href="/admin/users/{{ admin.id }}">
                         <button type="button" class="btn btn-primary">Edit</button>
                     </a>
 
-                    <a href="#">
-                        <button type="button" class="btn btn-danger">Delete</button>
-                    </a>
+                    <form style="display: unset;" method="POST">
+                        <input type="hidden" name="id" value="{{ admin.id }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}

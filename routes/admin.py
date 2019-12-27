@@ -19,8 +19,9 @@ from components.models import db, Admin, Message, Ticket
 
 # tools/specific for this blueprint
 from components.decorators import admin_login_required
-from components.core import is_integer
+from components.core import is_integer, is_valid_input
 from components.update import check_for_new_releases
+from components.exceptions import StandardException, PageException
 from sqlalchemy import or_
 
 # blueprint init
@@ -84,23 +85,13 @@ def view_ticket(id):
     template = "admin/view_ticket.html"
 
     if not is_integer(id):
-        return (
-            render_template(
-                "errors/custom.html", title="400", message="Id has to be integer."
-            ),
-            400,
-        )
+        raise StandardException("Id must be integer")
 
     ticket = Ticket.query.get(id)
 
     # if ticket does not exist in database
     if not ticket:
-        return (
-            render_template(
-                "errors/custom.html", title="400", message="Ticket does not exist."
-            ),
-            400,
-        )
+        raise StandardException("Ticket does not exist")
 
     messages = Message.query.filter_by(ticket_id=int(id)).order_by(Message.id.desc())
 
@@ -171,14 +162,7 @@ def view_ticket(id):
                     ticket_id=int(id),
                 )
             except Exception:
-                return (
-                    render_template(
-                        "errors/custom.html",
-                        title="400",
-                        message="Ticket ID does not exist.",
-                    ),
-                    400,
-                )
+                raise StandardException("Ticket ID does not exist")
 
             # update status
             ticket.status = 2
@@ -211,32 +195,17 @@ def view_ticket(id):
         if data["request_type"] == "status_update":
             for key, value in data.items():
                 if key != "request_type" and key != "status" and len(data) != 2:
-                    return render_template(
-                        "errors/custom.html",
-                        title="400",
-                        message="Invalid keys were sent.",
-                    )
+                    raise StandardException("Invalid keys were sent")
 
                 if key == "status":
                     if not is_integer(value):
-                        return render_template(
-                            "errors/custom.html",
-                            title="400",
-                            message="Value has to be integer.",
-                        )
+                        raise StandardException("Value has to be integer")
 
             # get ticket
             try:
                 ticket = Ticket.query.get(int(id))
             except Exception:
-                return (
-                    render_template(
-                        "errors/custom.html",
-                        title="400",
-                        message="Ticket ID does not exist.",
-                    ),
-                    400,
-                )
+                raise StandardException("Ticket ID does not exist")
 
             ticket.status = int(data["status"])
 
@@ -350,7 +319,7 @@ def admin_logout():
     return redirect(BASEPATH)
 
 
-@admin_routes.route(BASEPATH + "/users")
+@admin_routes.route(BASEPATH + "/users", methods=["POST", "GET"])
 @admin_login_required
 def users():
     template = "admin/users.html"
@@ -358,4 +327,77 @@ def users():
         Admin.id, Admin.name, Admin.email, Admin.time_created
     )
 
-    return render_template(template, admins=admins)
+    if request.method == "GET":
+        return render_template(template, admins=admins)
+
+    if request.method == "POST":
+        if not request.form.get("id"):
+            return (
+                render_template(template, admins=admins, fail="Missing form data."),
+                400,
+            )
+
+        if not is_integer(request.form["id"]):
+            return (
+                render_template(template, admins=admins, fail="Id must be integer."),
+                400,
+            )
+
+        if int(request.form["id"]) == session["admin_user_id"]:
+            raise PageException(
+                "You can not delete your own user.", template, admins=admins
+            )
+
+        # delete
+        try:
+            db.session.delete(Admin.query.get(request.form["id"]))
+            db.session.commit()
+        except Exception as e:
+            return (
+                render_template(
+                    template, admins=admins, fail=f"Unable to delete admin, error {e}"
+                ),
+                500,
+            )
+
+        # success
+        return render_template(template, admins=admins, success="User deleted.")
+
+
+@admin_routes.route(BASEPATH + "/users/<id>", methods=["POST", "GET"])
+@admin_login_required
+def user(id):
+    template = "admin/user.html"
+
+    if not is_integer(id):
+        raise StandardException("Id must be integer.")
+
+    admin = Admin.query.get(id)
+
+    if not admin:
+        raise StandardException("Admin does not exist.")
+
+    if request.method == "GET":
+        return render_template(template, admin=admin)
+
+    if request.method == "POST":
+        if not request.form.get("name") or not request.form.get("email"):
+            raise PageException("Missing data.", template, admin=admin)
+
+        if not is_valid_input(
+            request.form["name"], allow_newline=False
+        ) or not is_valid_input(request.form["email"], allow_newline=False):
+            raise PageException("Input is not valid.", template, admin=admin)
+
+        # update
+        admin.name = request.form["name"]
+        admin.email = request.form["email"]
+
+        # commit
+        try:
+            db.session.add(admin)
+            db.session.commit()
+        except Exception as e:
+            raise PageException(f"An error occured, error {e}", template, admin=admin)
+
+        return render_template(template, admin=admin, success="Account updated.")

@@ -23,6 +23,7 @@ from components.core import (
     random_string,
     is_valid_input,
 )
+from components.exceptions import StandardException
 
 # blueprint init
 client_routes = Blueprint("client_routes", __name__, template_folder="../templates")
@@ -247,52 +248,25 @@ def ticket():
     data = request.form
 
     if not url_data or len(url_data) < 2:
-        return (
-            render_template(
-                "errors/custom.html", title="400", message="Missing arguments."
-            ),
-            400,
-        )
+        raise StandardException("Missing arguments.")
 
     for key, value in url_data.items():
         if key != "id" and key != "key" and key != "success" and key != "fail":
-            return (
-                render_template(
-                    "errors/custom.html", title="400", message="Invalid keys were sent."
-                ),
-                400,
-            )
+            raise StandardException("Invalid keys were sent.")
 
         if key == "id":
             if not is_integer(value):
-                return (
-                    render_template(
-                        "errors/custom.html", title="400", message="Id must be integer."
-                    ),
-                    400,
-                )
+                raise StandardException("Id must be integer.")
 
         if key == "key":
             if len(value) != 15:
-                return (
-                    render_template(
-                        "errors/custom.html",
-                        title="400",
-                        message="Secret key is invalid length.",
-                    ),
-                    400,
-                )
+                raise StandardException("Secret key is invalid length.")
 
     # check if secret_key is correct
     ticket = Ticket.query.get(url_data["id"])
 
     if ticket.client_key != url_data["key"]:
-        return (
-            render_template(
-                "errors/custom.html", title="400", message="Secret key is invalid."
-            ),
-            400,
-        )
+        raise StandardException("Secret key is invalid.")
 
     messages = Message.query.filter_by(ticket_id=url_data["id"]).order_by(
         Message.id.desc()
@@ -378,12 +352,7 @@ def ticket():
                 message=data["message"], sender_id=0, ticket_id=int(url_data["id"])
             )
         except Exception:
-            return (
-                render_template(
-                    "errors/custom.html", title="400", message="Ticket does not exist."
-                ),
-                400,
-            )
+            raise StandardException("Ticket does not exist.")
 
         # update status
         ticket.status = 1

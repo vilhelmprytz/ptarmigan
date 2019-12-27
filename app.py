@@ -24,6 +24,7 @@ from routes.client import client_routes
 from routes.admin import admin_routes
 
 from components.core import read_configuration
+from components.exceptions import StandardException, PageException
 
 print(f"Running ptarmigan version {version}")
 
@@ -71,7 +72,24 @@ def inject_version():
     return dict(version=version, name=config["settings"]["name"])
 
 
-# error handler
+# error handlers
+@app.errorhandler(StandardException)
+def handle_standard_exception(error):
+    return (
+        render_template(
+            "errors/custom.html",
+            title=error.status_code,
+            message=error.to_dict()["message"],
+        ),
+        error.status_code,
+    )
+
+
+@app.errorhandler(PageException)
+def handle_page_exception(error):
+    return error.response
+
+
 @app.errorhandler(400)
 def error_400(e):
     return render_template("errors/400.html"), 400
