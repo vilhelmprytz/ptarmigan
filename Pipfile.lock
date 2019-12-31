@@ -112,11 +112,11 @@
         },
         "flask-minify": {
             "hashes": [
-                "sha256:67f854c98bcdfca77b0dd9c812bb947dee4e790f155938499d3c8a033995389b",
-                "sha256:cb8ef148287d933f6ae0437beb4e40c517b76b5ca548034afad497313c2e2136"
+                "sha256:06421bf48a452da9aa3201e65b4ef86354b61aba5bc2f412456a46007dc4be37",
+                "sha256:42d8c7ad1ea9a035f6be1d441c30570005e7076ed21e34f7c9ccddfd622a0667"
             ],
             "index": "pypi",
-            "version": "==0.15"
+            "version": "==0.16"
         },
         "flask-session": {
             "hashes": [
