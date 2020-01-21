@@ -16,19 +16,18 @@
             <p>{{ success }}</p>
         </div>
         {% endif %}
+        <form action="/admin/users/{{ admin.id }}", method="post">
+            <div class="form-group">
+                <label for="email">Name</label>
+                <input name="name" type="text" class="form-control" id="name" placeholder="Enter name" value="{{ admin.name }}" />
+            </div>
+    
+            <div class="form-group">
+                <label for="email">Email address</label>
+                <input name="email" type="email" class="form-control" id="email" placeholder="Enter email" value="{{ admin.email }}"/>
+            </div>
+    
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
     </div>
-
-    <form action="/admin/users/{{ admin.id }}", method="post">
-        <div class="form-group">
-            <label for="email">Name</label>
-            <input name="name" type="text" class="form-control" id="name" placeholder="Enter name" value="{{ admin.name }}" />
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email address</label>
-            <input name="email" type="email" class="form-control" id="email" placeholder="Enter email" value="{{ admin.email }}"/>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
 {% endblock %}
