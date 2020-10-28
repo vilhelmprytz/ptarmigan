@@ -51,7 +51,11 @@ def index():
 def system():
     status, new_release = check_for_new_releases()
 
-    return render_template("admin/system.html", status=status, new_release=new_release,)
+    return render_template(
+        "admin/system.html",
+        status=status,
+        new_release=new_release,
+    )
 
 
 @admin_routes.route(BASEPATH + "/tickets")
@@ -76,7 +80,11 @@ def tickets():
         ).order_by(Ticket.time_updated.asc())
         view_msg = "Viewing active tickets"
 
-    return render_template("admin/tickets.html", tickets=tickets, view_msg=view_msg,)
+    return render_template(
+        "admin/tickets.html",
+        tickets=tickets,
+        view_msg=view_msg,
+    )
 
 
 @admin_routes.route(BASEPATH + "/tickets/<id>", methods=["POST", "GET"])
@@ -106,7 +114,10 @@ def view_ticket(id):
     # view ticket to admin if GET request
     if request.method == "GET":
         return render_template(
-            template, ticket=ticket, messages=messages, admin_names=admin_names,
+            template,
+            ticket=ticket,
+            messages=messages,
+            admin_names=admin_names,
         )
 
     if request.method == "POST":
@@ -256,30 +267,45 @@ def admin_login():
         for key, value in data.items():
             if key != "email" and key != "password":
                 return (
-                    render_template(template, fail="Invalid keys were sent.",),
+                    render_template(
+                        template,
+                        fail="Invalid keys were sent.",
+                    ),
                     400,
                 )
 
             if len(value) < 3:
                 return (
-                    render_template(template, fail=f"{key} is too short.",),
+                    render_template(
+                        template,
+                        fail=f"{key} is too short.",
+                    ),
                     400,
                 )
 
             if key == "email":
                 if len(value) > 50:
                     return (
-                        render_template(template, fail=f"{key} is too long.",),
+                        render_template(
+                            template,
+                            fail=f"{key} is too long.",
+                        ),
                         400,
                     )
                 if "@" not in value:
                     return (
-                        render_template(template, fail=f"Email is missing '@'.",),
+                        render_template(
+                            template,
+                            fail=f"Email is missing '@'.",
+                        ),
                         400,
                     )
                 if "." not in value:
                     return (
-                        render_template(template, fail=f"Email is missing '.'",),
+                        render_template(
+                            template,
+                            fail=f"Email is missing '.'",
+                        ),
                         400,
                     )
 
@@ -290,7 +316,8 @@ def admin_login():
             ]  # should always only be one admin with this email
         except Exception:
             return render_template(
-                template, fail="Account does not exist or wrong password.",
+                template,
+                fail="Account does not exist or wrong password.",
             )
 
         # verify
@@ -301,7 +328,8 @@ def admin_login():
             session["admin_logged_in"] = False
             return (
                 render_template(
-                    template, fail="Account does not exist or wrong password.",
+                    template,
+                    fail="Account does not exist or wrong password.",
                 ),
                 400,
             )

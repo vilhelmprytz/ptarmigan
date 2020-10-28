@@ -25,6 +25,10 @@ from components.core import (
 )
 from components.exceptions import StandardException
 
+# other
+from hashlib import md5
+from urllib.parse import urlencode
+
 # blueprint init
 client_routes = Blueprint("client_routes", __name__, template_folder="../templates")
 
@@ -34,8 +38,24 @@ client_routes = Blueprint("client_routes", __name__, template_folder="../templat
 @client_routes.route("/")
 def index():
     return render_template(
-        "client/index.html", admin_status=session.get("admin_logged_in"),
+        "client/index.html",
+        admin_status=session.get("admin_logged_in"),
     )
+
+
+@client_routes.route("/api/gravatar/<email>")
+def gravatar_email(email):
+    size = 40
+    default = ""
+
+    gravatar_url = (
+        "https://www.gravatar.com/avatar/"
+        + md5((email.lower()).encode()).hexdigest()
+        + "?"
+    )
+    gravatar_url += urlencode({"d": default, "s": str(size)})
+
+    return redirect(gravatar_url)
 
 
 @client_routes.route("/submit", methods=["POST", "GET"])
@@ -238,7 +258,10 @@ def submit():
         return redirect(f"/ticket?id={ticket.id}&key={ticket.client_key}")
 
     if request.method == "GET":
-        return render_template(template, admin_status=session.get("admin_logged_in"),)
+        return render_template(
+            template,
+            admin_status=session.get("admin_logged_in"),
+        )
 
 
 @client_routes.route("/ticket", methods=["POST", "GET"])

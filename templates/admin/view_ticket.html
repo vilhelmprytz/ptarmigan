@@ -69,7 +69,8 @@
         <a id="message" class="list-group-item list-group-item-action flex-column align-items-start {% if message.sender_id is eq(0) %}{% else %}{% endif %}">
                 <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
-                    {% if message.sender_id is eq(0) %} 
+                    {% if message.sender_id is eq(0) %}
+                    <img src="/api/gravatar/{{ ticket.email }}" />
                     Client
                     {% else %}
                     {{ admin_names[message.sender_id] }}

@@ -58,6 +58,7 @@
                 <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">
                     {% if message.sender_id is eq(0) %} 
+                    <img src="/api/gravatar/{{ ticket.email }}" />
                     Client
                     {% else %}
                     {{ admin_names[message.sender_id] }}
